@@ -8,7 +8,7 @@
     "mint": "^4.3.19",
     "openapi-typescript": "^7.13.0",
     "quicktype": "^26.0.0",
-    "serve": "^14.2.6"
+    "serve": "^14.2.8"
   },
   "overrides": {
     "moment": "^2.31.0",
