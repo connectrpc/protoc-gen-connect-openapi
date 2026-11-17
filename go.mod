@@ -13,7 +13,7 @@ require (
 	github.com/lmittmann/tint v1.2.1
 	github.com/pb33f/go-yaml v0.1.1
 	github.com/pb33f/libopenapi v0.42.3
-	github.com/pb33f/libopenapi-validator v0.16.2
+	github.com/pb33f/libopenapi-validator v0.16.3
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/stretchr/testify v1.12.1
 	go.yaml.in/yaml/v3 v3.0.6
