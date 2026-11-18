@@ -64,6 +64,44 @@ components:
           type: integer
 ```
 
+## Predefined Rules
+[Predefined rules](https://buf.build/docs/protovalidate/schemas/predefined-rules/) are custom extensions of the standard rule messages, such as `buf.validate.StringRules`. Their `message` is added to the description (or the rule `id` if there is no message); the CEL expression itself is not rendered.
+
+A predefined rule whose expression is a plain regular expression match on the value is also rendered as the `pattern` keyword. These forms are recognized:
+
+* `this.matches('<regex>')`
+* `matches(this, '<regex>')`
+* `!rule || this.matches('<regex>')`, which only applies when the rule is set to `true`
+
+```protobuf
+extend buf.validate.StringRules {
+  optional bool key = 80048955 [(buf.validate.predefined).cel = {
+    id: "string.key"
+    message: "must be a key"
+    expression: "this.matches('^[a-z2-7]{25}[aeimquy4]$')"
+  }];
+}
+
+message Item {
+  string id = 1 [(buf.validate.field).string.(key) = true];
+}
+```
+
+Result:
+```yaml
+components:
+  schemas:
+    Item:
+      properties:
+        id:
+          type: string
+          title: id
+          pattern: ^[a-z2-7]{25}[aeimquy4]$
+          description: |
+            must be a key
+```
+
+Any other expression (for example one combined with `&&`, or a regular expression that isn't a string literal) is not converted. If the field already has a `pattern`, such as one from `(buf.validate.field).string.pattern`, it is kept. If several predefined rules have a pattern, the first one is used: extensions are ordered by name, and the rules of one extension by `id`.
 
 ## Message Options
 | Option | Supported? | Notes |
