@@ -44,8 +44,6 @@ components:
         disabledHex:
           type: string
           title: disabled_hex
-          description: |
-            must be lowercase hex
         standardWins:
           type: string
           title: standard_wins

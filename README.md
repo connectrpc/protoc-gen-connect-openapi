@@ -1,5 +1,5 @@
 # protoc-gen-connect-openapi
-[![Go](https://github.com/connectrpc/protoc-gen-connect-openapi/actions/workflows/go.yml/badge.svg)](https://github.com/connectrpc/protoc-gen-connect-openapi/actions/workflows/go.yml) [![Go Report Card](https://goreportcard.com/badge/connectrpc.com/protoc-gen-connect-openapi)](https://goreportcard.com/report/connectrpc.com/protoc-gen-connect-openapi) [![Go Reference](https://pkg.go.dev/badge/connectrpc.com/protoc-gen-connect-openapi.svg)](https://pkg.go.dev/connectrpc.com/protoc-gen-connect-openapi)
+[![Go](https://github.com/connectrpc/protoc-gen-connect-openapi/actions/workflows/go.yml/badge.svg)](https://github.com/connectrpc/protoc-gen-connect-openapi/actions/workflows/go.yml) [![Go Reference](https://pkg.go.dev/badge/connectrpc.com/protoc-gen-connect-openapi.svg)](https://pkg.go.dev/connectrpc.com/protoc-gen-connect-openapi)
 
 Generate OpenAPI v3.1 from protobuf matching the [Connect protocol](https://connectrpc.com/docs/protocol). With these [OpenAPI](https://www.openapis.org/what-is-openapi) specs, you can:
 

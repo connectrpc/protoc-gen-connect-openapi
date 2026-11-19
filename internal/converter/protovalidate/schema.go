@@ -116,7 +116,7 @@ func SchemaWithFieldAnnotations(opts options.Options, schema *base.Schema, desc 
 		opts.Logger.Warn("unable to resolve field rules", slog.Any("error", err))
 		return schema
 	}
-	if rules == nil {
+	if rules == nil || rules.GetIgnore() == validate.Ignore_IGNORE_ALWAYS {
 		return schema
 	}
 
@@ -142,7 +142,7 @@ func PopulateParentProperties(opts options.Options, parent *base.Schema, desc pr
 		opts.Logger.Warn("unable to resolve field rules", slog.Any("error", err))
 		return parent
 	}
-	if rules == nil {
+	if rules == nil || rules.GetIgnore() == validate.Ignore_IGNORE_ALWAYS {
 		return parent
 	}
 	if rules.Required != nil && *rules.Required {
@@ -153,8 +153,14 @@ func PopulateParentProperties(opts options.Options, parent *base.Schema, desc pr
 
 //gocyclo:ignore
 func updateSchemaWithFieldRules(opts options.Options, schema *base.Schema, rules *validate.FieldRules, onlyScalar bool, desc protoreflect.FieldDescriptor) {
-	if rules == nil {
+	// IGNORE_ALWAYS turns off every rule of the field, or of the list items
+	// or map entries the rules are for.
+	if rules == nil || rules.GetIgnore() == validate.Ignore_IGNORE_ALWAYS {
 		return
+	}
+	if rules.GetIgnore() == validate.Ignore_IGNORE_IF_ZERO_VALUE {
+		before := zeroValueKeywords(schema)
+		defer func() { allowZeroValue(schema, before, desc, onlyScalar) }()
 	}
 
 	var innerRules protoreflect.Message
@@ -252,8 +258,9 @@ func updateSchemaWithFieldRules(opts options.Options, schema *base.Schema, rules
 			if predefinedRules == nil {
 				continue
 			}
-			updateWithCEL(schema, predefinedRules.GetCel(), &entry.v, entry.fd)
-			updateSchemaWithPredefinedPattern(schema, predefinedRules.GetCel(), ruleEnabled(entry.v, entry.fd))
+			celRules := enabledPredefinedRules(predefinedRules.GetCel(), entry.v, entry.fd)
+			updateWithCEL(schema, celRules, &entry.v, entry.fd)
+			updateSchemaWithPredefinedPattern(schema, celRules, ruleEnabled(entry.v, entry.fd))
 		}
 	}
 
@@ -1169,8 +1176,15 @@ func updateSchemaMap(opts options.Options, schema *base.Schema, constraint *vali
 		v := int64(*constraint.MaxPairs)
 		schema.MaxProperties = &v
 	}
-	// NOTE: Most of these properties don't make sense for object keys
-	// updateSchemaWithFieldRules(schema, constraint.Keys)
+	// JSON object keys are always strings, so only the rules of string keys
+	// can be written as a schema for the property names.
+	if constraint.Keys != nil && desc != nil && desc.IsMap() && desc.MapKey().Kind() == protoreflect.StringKind {
+		keySchema := &base.Schema{Type: []string{"string"}}
+		updateSchemaWithFieldRules(opts, keySchema, constraint.Keys, true, desc.MapKey())
+		if hasKeyRules(keySchema) {
+			schema.PropertyNames = base.CreateSchemaProxy(keySchema)
+		}
+	}
 	if schema.AdditionalProperties != nil && constraint.Values != nil {
 		var valueDesc protoreflect.FieldDescriptor
 		if desc != nil {
@@ -1178,6 +1192,14 @@ func updateSchemaMap(opts options.Options, schema *base.Schema, constraint *vali
 		}
 		updateSchemaWithFieldRules(opts, schema.AdditionalProperties.A.Schema(), constraint.Values, false, valueDesc)
 	}
+}
+
+// hasKeyRules reports whether any rule changed a map key schema, which starts
+// out with only a type.
+func hasKeyRules(keySchema *base.Schema) bool {
+	return keySchema.Description != "" || keySchema.Pattern != "" || keySchema.Format != "" ||
+		keySchema.MinLength != nil || keySchema.MaxLength != nil || keySchema.Const != nil ||
+		len(keySchema.Enum) > 0 || keySchema.Not != nil || len(keySchema.AnyOf) > 0
 }
 
 func updateSchemaAny(opts options.Options, schema *base.Schema, constraint *validate.AnyRules) {

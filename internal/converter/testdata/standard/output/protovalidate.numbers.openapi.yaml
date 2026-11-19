@@ -113,9 +113,11 @@ components:
       properties:
         val:
           type: number
+          anyOf:
+            - maximum: 256
+              minimum: 128
+            - const: 0
           title: val
-          maximum: 256
-          minimum: 128
           format: double
       title: DoubleIgnore
       additionalProperties: false
@@ -288,9 +290,11 @@ components:
       properties:
         val:
           type: integer
+          anyOf:
+            - maximum: 256
+              minimum: 128
+            - const: 0
           title: val
-          maximum: 256
-          minimum: 128
       title: Fixed32Ignore
       additionalProperties: false
     buf.validate.conformance.cases.Fixed32In:
@@ -627,9 +631,11 @@ components:
       properties:
         val:
           type: number
+          anyOf:
+            - maximum: 256
+              minimum: 128
+            - const: 0
           title: val
-          maximum: 256
-          minimum: 128
           format: float
       title: FloatIgnore
       additionalProperties: false
@@ -810,9 +816,11 @@ components:
       properties:
         val:
           type: integer
+          anyOf:
+            - maximum: 256
+              minimum: 128
+            - const: 0
           title: val
-          maximum: 256
-          minimum: 128
           format: int32
       title: Int32Ignore
       additionalProperties: false
@@ -1232,9 +1240,11 @@ components:
       properties:
         val:
           type: integer
+          anyOf:
+            - maximum: 256
+              minimum: 128
+            - const: 0
           title: val
-          maximum: 256
-          minimum: 128
           format: int32
       title: SFixed32Ignore
       additionalProperties: false
@@ -1561,9 +1571,11 @@ components:
       properties:
         val:
           type: integer
+          anyOf:
+            - maximum: 256
+              minimum: 128
+            - const: 0
           title: val
-          maximum: 256
-          minimum: 128
           format: int32
       title: SInt32Ignore
       additionalProperties: false
@@ -1882,9 +1894,11 @@ components:
       properties:
         val:
           type: integer
+          anyOf:
+            - maximum: 256
+              minimum: 128
+            - const: 0
           title: val
-          maximum: 256
-          minimum: 128
       title: UInt32Ignore
       additionalProperties: false
     buf.validate.conformance.cases.UInt32In:

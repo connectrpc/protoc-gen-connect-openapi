@@ -262,8 +262,10 @@ components:
           type:
             - string
             - "null"
+          anyOf:
+            - format: uri
+            - const: ""
           title: uri_field
-          format: uri
         floatConst:
           type: number
           title: float_const
@@ -1271,6 +1273,10 @@ components:
             title: value
         mapKeys:
           type: object
+          propertyNames:
+            type: string
+            maxLength: 10
+            minLength: 3
           title: map_keys
           additionalProperties:
             type: string
@@ -1418,6 +1424,76 @@ components:
           type: boolean
           title: bool_const_false
           const: false
+        ignorePattern:
+          type: string
+          anyOf:
+            - pattern: ^[a-z]+$
+            - const: ""
+          title: ignore_pattern
+          description: |-
+            IGNORE_IF_ZERO_VALUE skips the rules for the zero value, so the schema
+             accepts the zero value as well as the values the rules allow.
+        ignoreMinItems:
+          type: array
+          anyOf:
+            - minItems: 2
+            - maxItems: 0
+          items:
+            type: string
+          title: ignore_min_items
+        ignoreMinPairs:
+          type: object
+          anyOf:
+            - minProperties: 2
+            - maxProperties: 0
+          title: ignore_min_pairs
+          additionalProperties:
+            type: string
+            title: value
+        ignoreEnumIn:
+          title: ignore_enum_in
+          enum:
+            - MY_ENUM_VALUE2
+            - MY_ENUM_UNSPECIFIED
+          $ref: '#/components/schemas/protovalidate.MyEnum'
+        ignoreItems:
+          type: array
+          items:
+            type: string
+            anyOf:
+              - minLength: 3
+              - const: ""
+          title: ignore_items
+        ignoreMaxLen:
+          type: string
+          title: ignore_max_len
+          maxLength: 10
+          description: The zero value always satisfies a maximum length.
+        ignoreAlways:
+          type: string
+          title: ignore_always
+          description: IGNORE_ALWAYS turns off the field's rules, including required.
+        mapKeyPattern:
+          type: object
+          propertyNames:
+            type: string
+            pattern: ^[a-z]+$
+          title: map_key_pattern
+          additionalProperties:
+            type: string
+            title: value
+          description: The rules of string keys apply to the property names.
+        mapIntKeys:
+          type: object
+          title: map_int_keys
+          additionalProperties:
+            type: string
+            title: value
+          description: Keys of other types are strings in JSON, so their rules aren't rendered.
+        uuidOff:
+          type: string
+          title: uuid_off
+          description: A boolean rule set to false doesn't apply, so it isn't described.
       title: LotsOfValidationRules
       required:
         - requiredField
