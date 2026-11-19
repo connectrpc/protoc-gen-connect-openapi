@@ -80,7 +80,15 @@ func httpRuleToPathMap(opts options.Options, md protoreflect.MethodDescriptor, r
 	case *annotations.HttpRule_Patch:
 		method, template = http.MethodPatch, pattern.Patch
 	case *annotations.HttpRule_Custom:
-		method, template = pattern.Custom.GetKind(), pattern.Custom.GetPath()
+		// OpenAPI only has operations for these custom methods.
+		method, template = strings.ToUpper(pattern.Custom.GetKind()), pattern.Custom.GetPath()
+		switch method {
+		case "", http.MethodHead, http.MethodOptions, http.MethodTrace:
+		default:
+			opts.Logger.Warn("HTTP rule uses a method OpenAPI can't describe",
+				slog.String("method", string(md.FullName())), slog.String("kind", pattern.Custom.GetKind()))
+			return nil
+		}
 	default:
 		opts.Logger.Warn("invalid type of pattern for HTTP rule", slog.Any("pattern", pattern))
 		return nil
@@ -379,7 +387,12 @@ func httpRuleToPathMap(opts options.Options, md protoreflect.MethodDescriptor, r
 		pathItem.Delete = op
 	case http.MethodPatch:
 		pathItem.Patch = op
-	default:
+	case http.MethodHead:
+		pathItem.Head = op
+	case http.MethodOptions:
+		pathItem.Options = op
+	case http.MethodTrace:
+		pathItem.Trace = op
 	}
 	openAPIPath := partsToOpenAPIPath(tokens, resMap, paramRenames)
 	paths.Set(openAPIPath, pathItem)
@@ -436,6 +449,9 @@ func mergePathItem(opts options.Options, dst, src *v3.PathItem, path string) {
 		{http.MethodPost, &dst.Post, src.Post},
 		{http.MethodDelete, &dst.Delete, src.Delete},
 		{http.MethodPatch, &dst.Patch, src.Patch},
+		{http.MethodHead, &dst.Head, src.Head},
+		{http.MethodOptions, &dst.Options, src.Options},
+		{http.MethodTrace, &dst.Trace, src.Trace},
 	} {
 		if slot.src == nil {
 			continue
