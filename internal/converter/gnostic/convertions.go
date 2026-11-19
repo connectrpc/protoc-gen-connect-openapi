@@ -421,12 +421,12 @@ func toMediaTypes(opts options.Options, items *goa3.MediaTypes) *orderedmap.Map[
 	content := orderedmap.New[string, *v3.MediaType]()
 	for _, item := range items.GetAdditionalProperties() {
 		mt := &v3.MediaType{
-			Schema:     toSchemaOrReference(opts, item.Value.Schema),
-			Examples:   toExamples(item.Value.GetExamples()),
-			Encoding:   toEncodings(opts, item.Value.GetEncoding()),
-			Extensions: toExtensions(item.Value.GetSpecificationExtension()),
+			Schema:     toSchemaOrReference(opts, item.GetValue().GetSchema()),
+			Examples:   toExamples(item.GetValue().GetExamples()),
+			Encoding:   toEncodings(opts, item.GetValue().GetEncoding()),
+			Extensions: toExtensions(item.GetValue().GetSpecificationExtension()),
 		}
-		if val := item.GetValue().Example; val != nil {
+		if val := item.GetValue().GetExample(); val != nil {
 			mt.Example = util.ConvertNodeV3toV4(val.ToRawInfo())
 		}
 		content.Set(item.Name, mt)

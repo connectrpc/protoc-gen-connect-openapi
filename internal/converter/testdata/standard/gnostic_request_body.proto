@@ -1,0 +1,138 @@
+// Copyright 2023-2026 The Connect Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package standard;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+// A gnostic request_body replaces the generated body, with two exceptions: a
+// media type without a schema uses the generated schema, and a body without
+// content keeps the generated content.
+service GnosticRequestBodyService {
+  // The media type only sets an example, so it keeps the generated schema.
+  rpc CreateBodyItem(CreateBodyItemRequest) returns (BodyItem) {
+    option (gnostic.openapi.v3.operation) = {
+      request_body: {
+        request_body: {
+          required: true
+          content: {
+            additional_properties: {
+              name: "application/json"
+              value: {
+                example: {yaml: "{name: item-1}"}
+              }
+            }
+          }
+        }
+      }
+    };
+  }
+
+  // Without content, the annotation describes the generated body.
+  rpc DescribeBodyItem(DescribeBodyItemRequest) returns (BodyItem) {
+    option (gnostic.openapi.v3.operation) = {
+      request_body: {
+        request_body: {description: "The item to describe."}
+      }
+    };
+  }
+
+  // The same applies to a body generated from an HTTP rule.
+  rpc ReplaceBodyItem(ReplaceBodyItemRequest) returns (BodyItem) {
+    option (google.api.http) = {
+      put: "/v1/items/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      request_body: {
+        request_body: {
+          required: true
+          content: {
+            additional_properties: {
+              name: "application/json"
+              value: {
+                example: {yaml: "{name: item-1}"}
+              }
+            }
+          }
+        }
+      }
+    };
+  }
+
+  // A body field isn't required by default; the annotation makes it so and
+  // keeps the generated content and description.
+  rpc PatchBodyItem(PatchBodyItemRequest) returns (BodyItem) {
+    option (google.api.http) = {
+      patch: "/v1/items/{id}"
+      body: "item"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      request_body: {
+        request_body: {required: true}
+      }
+    };
+  }
+
+  // A media type with its own schema replaces the generated body entirely.
+  rpc ImportBodyItems(ImportBodyItemsRequest) returns (BodyItem) {
+    option (gnostic.openapi.v3.operation) = {
+      request_body: {
+        request_body: {
+          content: {
+            additional_properties: {
+              name: "text/csv"
+              value: {
+                schema: {
+                  schema: {type: "string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+  }
+}
+
+message BodyItem {
+  string id = 1;
+  string name = 2;
+}
+
+message CreateBodyItemRequest {
+  string name = 1;
+}
+
+message DescribeBodyItemRequest {
+  string name = 1;
+}
+
+message ReplaceBodyItemRequest {
+  string id = 1;
+  string name = 2;
+}
+
+message PatchBodyItemRequest {
+  string id = 1;
+  // The fields to change.
+  BodyItem item = 2;
+}
+
+message ImportBodyItemsRequest {
+  string csv = 1;
+}

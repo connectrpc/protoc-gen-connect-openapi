@@ -137,6 +137,52 @@ func TestExpandExampleEntryRejectsRecursiveMergeKey(t *testing.T) {
 	require.ErrorIs(t, err, errExampleLimit)
 }
 
+func TestExpandExampleEntryRejectsInvalidExamples(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name  string
+		value string
+	}{
+		{name: "duplicate key", value: "{a: 1, a: 2}"},
+		{name: "duplicate key after normalization", value: "{31: a, 0x1F: b}"},
+		{name: "duplicate key in nested map", value: "{a: [{b: 1, b: 2}]}"},
+		{name: "scalar does not match bool tag", value: "!!bool yes"},
+		{name: "scalar does not match int tag", value: "!!int abc"},
+		{name: "invalid base64", value: "!!binary 'not base64!'"},
+		{name: "map as key", value: "{{a: 1}: b}"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var node yaml.Node
+			require.NoError(t, yaml.Unmarshal([]byte(tc.value), &node))
+
+			_, err := expandExampleEntry(&node)
+			require.Error(t, err)
+		})
+	}
+}
+
+func TestExpandExampleEntryRejectsNonMapMergeValue(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name  string
+		value string
+	}{
+		{name: "scalar", value: "{<<: 1, a: 2}"},
+		{name: "sequence of scalars", value: "{<<: [1, 2], a: 2}"},
+		{name: "alias to scalar", value: "{a: &x 1, b: {<<: *x}}"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var node yaml.Node
+			require.NoError(t, yaml.Unmarshal([]byte(tc.value), &node))
+
+			_, err := expandExampleEntry(&node)
+			require.ErrorIs(t, err, errExampleMerge)
+		})
+	}
+}
+
 func TestExpandExampleEntryRejectsRecursiveAlias(t *testing.T) {
 	t.Parallel()
 	var node yaml.Node
@@ -190,6 +236,32 @@ func TestSchemaWithAnnotationsSkipsRecursiveExample(t *testing.T) {
 
 	assert.Empty(t, schema.Examples)
 	assert.Contains(t, logs.String(), "unable to expand example")
+}
+
+func TestSchemaWithAnnotationsSkipsInvalidExample(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name  string
+		value string
+	}{
+		{name: "duplicate key", value: "{a: 1, a: 2}"},
+		{name: "scalar does not match tag", value: "!!bool yes"},
+		{name: "non-map merge value", value: "{<<: 1, a: 2}"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var logs bytes.Buffer
+			opts := options.NewOptions()
+			opts.Logger = slog.New(slog.NewTextHandler(&logs, nil))
+
+			schema := schemaWithAnnotations(opts, &base.Schema{}, &goa3.Schema{
+				Example: &goa3.Any{Yaml: tc.value},
+			})
+
+			assert.Empty(t, schema.Examples)
+			assert.Contains(t, logs.String(), "unable to expand example")
+		})
+	}
 }
 
 func TestSchemaWithAnnotationsExampleTypes(t *testing.T) {

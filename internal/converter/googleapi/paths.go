@@ -266,10 +266,8 @@ func httpRuleToPathMap(opts options.Options, md protoreflect.MethodDescriptor, r
 		newQueryParams := flattenToParams(opts, md.Input(), "", fieldNamesInPath)
 		op.Parameters = util.MergeParameters(op.Parameters, newQueryParams)
 	case "*":
-		if hasGnosticRequestBody {
-			// The gnostic annotation provides the request body.
-			break
-		}
+		// A gnostic request body is applied on top of the generated one
+		// later, so the body is generated either way.
 		if len(fieldNamesInPath) > 0 {
 			_, s := schema.MessageToSchema(opts, md.Input())
 			if s != nil {
@@ -305,13 +303,11 @@ func httpRuleToPathMap(opts options.Options, md protoreflect.MethodDescriptor, r
 
 	default:
 		if field, jsonPath := resolveField(opts, md.Input(), rule.Body); field != nil {
-			if !hasGnosticRequestBody {
-				loc := field.ParentFile().SourceLocations().ByDescriptor(field)
-				bodySchema := schema.FieldToSchema(opts, nil, field)
-				op.RequestBody = &v3.RequestBody{
-					Description: util.FormatComments(loc),
-					Content:     util.MakeMediaTypes(opts, bodySchema, false, false),
-				}
+			loc := field.ParentFile().SourceLocations().ByDescriptor(field)
+			bodySchema := schema.FieldToSchema(opts, nil, field)
+			op.RequestBody = &v3.RequestBody{
+				Description: util.FormatComments(loc),
+				Content:     util.MakeMediaTypes(opts, bodySchema, false, false),
 			}
 
 			// Add any unhandled fields in the request message as query parameters.

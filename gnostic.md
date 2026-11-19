@@ -107,6 +107,13 @@ message HelloReply {
 | (gnostic.openapi.v3.schema).servers  | ✅ |
 | (gnostic.openapi.v3.schema).specification_extension | ✅ |
 
+A `request_body` replaces the request body generated from the method's input. There are two exceptions:
+
+- If a media type has no `schema`, the generated schema for that media type is used. For example, setting only an `example` on `application/json` keeps the generated schema and adds the example.
+- If the request body has no `content`, the generated content and `required` are kept. Use this to set only a `description`.
+
+Media types that aren't listed are removed. A `reference` replaces the whole body.
+
 #### Message Options
 | Option | Supported? |
 |---|---|
