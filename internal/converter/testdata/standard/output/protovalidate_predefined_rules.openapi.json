@@ -30,6 +30,29 @@
             "type": "string",
             "title": "title",
             "description": "this must be 50 or fewer characters\n"
+          },
+          "key": {
+            "type": "string",
+            "title": "key",
+            "pattern": "^[a-z2-7]{25}[aeimquy4]$",
+            "description": "must be a key\n"
+          },
+          "hex": {
+            "type": "string",
+            "title": "hex",
+            "pattern": "^[0-9a-f]+$",
+            "description": "must be lowercase hex\n"
+          },
+          "disabledHex": {
+            "type": "string",
+            "title": "disabled_hex",
+            "description": "must be lowercase hex\n"
+          },
+          "standardWins": {
+            "type": "string",
+            "title": "standard_wins",
+            "pattern": "^std$",
+            "description": "must be a key\n"
           }
         },
         "title": "Person",

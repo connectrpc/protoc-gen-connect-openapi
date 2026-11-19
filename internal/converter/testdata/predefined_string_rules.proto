@@ -29,4 +29,14 @@ extend buf.validate.StringRules {
     message: "this must be 50 or fewer characters"
     expression: "this.size() <= 50"
   }];
+  optional bool matches_key = 80048955 [(buf.validate.predefined).cel = {
+    id: "string.matches_key"
+    message: "must be a key"
+    expression: "this.matches('^[a-z2-7]{25}[aeimquy4]$')"
+  }];
+  optional bool guarded_hex = 80048956 [(buf.validate.predefined).cel = {
+    id: "string.guarded_hex"
+    message: "must be lowercase hex"
+    expression: "!rule || this.matches('^[0-9a-f]+$')"
+  }];
 }

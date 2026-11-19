@@ -24,4 +24,11 @@ message Person {
   string middle_name = 2 [(buf.validate.field).string.(optional_medium) = true];
   string last_name = 3 [(buf.validate.field).string.(required_medium) = true];
   string title = 4 [(buf.validate.field).string.(optional_medium) = true];
+  string key = 5 [(buf.validate.field).string.(matches_key) = true];
+  string hex = 6 [(buf.validate.field).string.(guarded_hex) = true];
+  string disabled_hex = 7 [(buf.validate.field).string.(guarded_hex) = false];
+  string standard_wins = 8 [
+    (buf.validate.field).string.pattern = "^std$",
+    (buf.validate.field).string.(matches_key) = true
+  ];
 }

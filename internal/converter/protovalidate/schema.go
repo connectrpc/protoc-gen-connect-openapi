@@ -253,6 +253,7 @@ func updateSchemaWithFieldRules(opts options.Options, schema *base.Schema, rules
 				continue
 			}
 			updateWithCEL(schema, predefinedRules.GetCel(), &entry.v, entry.fd)
+			updateSchemaWithPredefinedPattern(schema, predefinedRules.GetCel(), ruleEnabled(entry.v, entry.fd))
 		}
 	}
 
