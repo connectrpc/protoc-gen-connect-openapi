@@ -104,6 +104,39 @@ func TestExpandExampleEntryJSONMatchesYAML(t *testing.T) {
 	}
 }
 
+func TestExpandExampleEntryMergesAnchors(t *testing.T) {
+	t.Parallel()
+	var node yaml.Node
+	require.NoError(t, yaml.Unmarshal([]byte("base: &b {a: 1, b: 1}\nchild:\n  <<: *b\n  a: 2\n"), &node))
+
+	expanded, err := expandExampleEntry(&node)
+	require.NoError(t, err)
+	out, err := yaml.Marshal(expanded)
+	require.NoError(t, err)
+	assert.YAMLEq(t, "base: {a: 1, b: 1}\nchild: {a: 2, b: 1}\n", string(out))
+}
+
+func TestExpandExampleEntryMergesSequenceOfAnchors(t *testing.T) {
+	t.Parallel()
+	var node yaml.Node
+	require.NoError(t, yaml.Unmarshal([]byte("a: &a {x: 1}\nb: &b {x: 2, y: 2}\nchild:\n  <<: [*a, *b]\n"), &node))
+
+	expanded, err := expandExampleEntry(&node)
+	require.NoError(t, err)
+	out, err := yaml.Marshal(expanded)
+	require.NoError(t, err)
+	assert.YAMLEq(t, "a: {x: 1}\nb: {x: 2, y: 2}\nchild: {x: 1, y: 2}\n", string(out))
+}
+
+func TestExpandExampleEntryRejectsRecursiveMergeKey(t *testing.T) {
+	t.Parallel()
+	var node yaml.Node
+	require.NoError(t, yaml.Unmarshal([]byte("&a {<<: *a}"), &node))
+
+	_, err := expandExampleEntry(&node)
+	require.ErrorIs(t, err, errExampleLimit)
+}
+
 func TestExpandExampleEntryRejectsRecursiveAlias(t *testing.T) {
 	t.Parallel()
 	var node yaml.Node

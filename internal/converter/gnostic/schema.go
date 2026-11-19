@@ -292,19 +292,7 @@ func expandExampleNode(node *yaml.Node, state *exampleExpandState, depth int) (*
 		}
 		return nullExampleNode(), nil
 	case yaml.MappingNode:
-		out := utils.CreateEmptyMapNode()
-		for i := 0; i+1 < len(node.Content); i += 2 {
-			key, err := expandExampleNode(node.Content[i], state, depth+1)
-			if err != nil {
-				return nil, err
-			}
-			value, err := expandExampleNode(node.Content[i+1], state, depth+1)
-			if err != nil {
-				return nil, err
-			}
-			out.Content = append(out.Content, key, value)
-		}
-		return out, nil
+		return expandExampleMapping(node, state, depth)
 	case yaml.SequenceNode:
 		out := utils.CreateEmptySequenceNode()
 		for _, child := range node.Content {
@@ -329,6 +317,98 @@ func expandExampleNode(node *yaml.Node, state *exampleExpandState, depth int) (*
 	default:
 		return normalizeExampleScalar(node), nil
 	}
+}
+
+func expandExampleMapping(node *yaml.Node, state *exampleExpandState, depth int) (*yaml.Node, error) {
+	out := utils.CreateEmptyMapNode()
+	explicit := make(map[string]bool)
+	var merged []examplePair
+
+	for i := 0; i+1 < len(node.Content); i += 2 {
+		keyNode := node.Content[i]
+		valueNode := node.Content[i+1]
+		if keyNode.Tag == "!!merge" {
+			pairs, err := collectMergePairs(valueNode, state, depth+1)
+			if err != nil {
+				return nil, err
+			}
+			merged = append(merged, pairs...)
+			continue
+		}
+		key, err := expandExampleNode(keyNode, state, depth+1)
+		if err != nil {
+			return nil, err
+		}
+		value, err := expandExampleNode(valueNode, state, depth+1)
+		if err != nil {
+			return nil, err
+		}
+		explicit[exampleKeyID(key)] = true
+		out.Content = append(out.Content, key, value)
+	}
+
+	seenMerged := make(map[string]bool)
+	for _, pair := range merged {
+		id := exampleKeyID(pair.key)
+		if explicit[id] || seenMerged[id] {
+			continue
+		}
+		seenMerged[id] = true
+		out.Content = append(out.Content, pair.key, pair.value)
+	}
+	return out, nil
+}
+
+type examplePair struct {
+	key   *yaml.Node
+	value *yaml.Node
+}
+
+func collectMergePairs(node *yaml.Node, state *exampleExpandState, depth int) ([]examplePair, error) {
+	if depth > maxExampleDepth || state.remaining <= 0 {
+		return nil, errExampleLimit
+	}
+	if node == nil {
+		return nil, nil
+	}
+	state.remaining--
+
+	switch node.Kind {
+	case yaml.AliasNode:
+		if node.Alias == nil || state.seenAliases[node.Alias] {
+			return nil, errExampleLimit
+		}
+		state.seenAliases[node.Alias] = true
+		pairs, err := collectMergePairs(node.Alias, state, depth+1)
+		delete(state.seenAliases, node.Alias)
+		return pairs, err
+	case yaml.SequenceNode:
+		var pairs []examplePair
+		for _, child := range node.Content {
+			childPairs, err := collectMergePairs(child, state, depth+1)
+			if err != nil {
+				return nil, err
+			}
+			pairs = append(pairs, childPairs...)
+		}
+		return pairs, nil
+	case yaml.MappingNode:
+		expanded, err := expandExampleMapping(node, state, depth+1)
+		if err != nil {
+			return nil, err
+		}
+		pairs := make([]examplePair, 0, len(expanded.Content)/2)
+		for i := 0; i+1 < len(expanded.Content); i += 2 {
+			pairs = append(pairs, examplePair{key: expanded.Content[i], value: expanded.Content[i+1]})
+		}
+		return pairs, nil
+	default:
+		return nil, nil
+	}
+}
+
+func exampleKeyID(key *yaml.Node) string {
+	return key.Tag + ":" + key.Value
 }
 
 func normalizeExampleScalar(node *yaml.Node) *yaml.Node {

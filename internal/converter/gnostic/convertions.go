@@ -78,7 +78,7 @@ func toSecurityRequirements(opts options.Options, securityReq []*goa3.SecurityRe
 			if prop.Name == "" {
 				if prop.Value != nil && len(prop.Value.Value) > 0 && opts.Logger != nil {
 					opts.Logger.Warn("security requirement entry has scopes but no scheme name",
-						slog.Any("scopes", prop.Value.Value))
+						slog.Int("requirement", i), slog.Any("scopes", prop.Value.Value))
 				}
 				continue
 			}
