@@ -5,7 +5,7 @@
 ```yaml
 version: v2
 plugins:
-  - remote: buf.build/community/sudorandom-connect-openapi:v0.28.0
+  - remote: buf.build/connectrpc/openapi:v0.30.0
     out: gen
 ```
 

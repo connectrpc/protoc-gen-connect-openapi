@@ -100,12 +100,12 @@ plugins:
 ## Usage
 
 ### Using buf
-This plugin is now available [as a remote plugin in the BSR](https://buf.build/community/sudorandom-connect-openapi).
+This plugin is now available [as a remote plugin in the BSR](https://buf.build/connectrpc/openapi).
 
 ```yaml
 version: v2
 plugins:
-  - remote: buf.build/community/sudorandom-connect-openapi:v0.28.0
+  - remote: buf.build/connectrpc/openapi:v0.30.0
     out: gen
 ```
 
