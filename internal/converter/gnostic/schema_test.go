@@ -288,3 +288,28 @@ func TestSchemaWithAnnotationsExampleTypes(t *testing.T) {
 		})
 	}
 }
+
+func TestSchemaWithAnnotationsTypeOverrideKeepsDependentKeywords(t *testing.T) {
+	t.Parallel()
+	schema := schemaWithAnnotations(options.NewOptions(), &base.Schema{Type: []string{"string"}}, &goa3.Schema{
+		Type:        "array",
+		MaxItems:    3,
+		MinItems:    1,
+		UniqueItems: true,
+	})
+
+	assert.Equal(t, []string{"array"}, schema.Type)
+	require.NotNil(t, schema.MaxItems)
+	assert.Equal(t, int64(3), *schema.MaxItems)
+	require.NotNil(t, schema.MinItems)
+	assert.Equal(t, int64(1), *schema.MinItems)
+	require.NotNil(t, schema.UniqueItems)
+	assert.True(t, *schema.UniqueItems)
+
+	schema = schemaWithAnnotations(options.NewOptions(), &base.Schema{Type: []string{"string"}}, &goa3.Schema{
+		Type:          "object",
+		MaxProperties: 2,
+	})
+	require.NotNil(t, schema.MaxProperties)
+	assert.Equal(t, int64(2), *schema.MaxProperties)
+}

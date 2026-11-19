@@ -16,7 +16,7 @@ option (gnostic.openapi.v3.document) = {
     contact: {
       name: "Contact Name";
       url: "https://github.com/connectrpc/protoc-gen-connect-openapi";
-      email: "hello@sudorandom.com";
+      email: "support@example.com";
     }
     license: {
       name: "Apache-2.0";
@@ -80,7 +80,7 @@ message HelloReply {
 #### File Options
 | Option | Supported? | Notes |
 |---|---|---|
-| (gnostic.openapi.v3.document).openapi | ✅ | |
+| (gnostic.openapi.v3.document).openapi | ❌ | The plugin sets the OpenAPI version |
 | (gnostic.openapi.v3.document).info | ✅ | |
 | (gnostic.openapi.v3.document).servers | ✅ | |
 | (gnostic.openapi.v3.document).paths | ✅ | |
@@ -93,19 +93,19 @@ message HelloReply {
 #### Method Options
 | Option | Supported? |
 |---|---|
-| (gnostic.openapi.v3.schema).tags | ✅ |
-| (gnostic.openapi.v3.schema).summary | ✅ |
-| (gnostic.openapi.v3.schema).description | ✅ |
-| (gnostic.openapi.v3.schema).external_docs | ✅ |
-| (gnostic.openapi.v3.schema).operation_id | ✅ |
-| (gnostic.openapi.v3.schema).parameters | ✅ |
-| (gnostic.openapi.v3.schema).request_body | ✅ |
-| (gnostic.openapi.v3.schema).responses | ✅ |
-| (gnostic.openapi.v3.schema).callbacks | ✅ |
-| (gnostic.openapi.v3.schema).deprecated  | ✅ |
-| (gnostic.openapi.v3.schema).security  | ✅ |
-| (gnostic.openapi.v3.schema).servers  | ✅ |
-| (gnostic.openapi.v3.schema).specification_extension | ✅ |
+| (gnostic.openapi.v3.operation).tags | ✅ |
+| (gnostic.openapi.v3.operation).summary | ✅ |
+| (gnostic.openapi.v3.operation).description | ✅ |
+| (gnostic.openapi.v3.operation).external_docs | ✅ |
+| (gnostic.openapi.v3.operation).operation_id | ✅ |
+| (gnostic.openapi.v3.operation).parameters | ✅ |
+| (gnostic.openapi.v3.operation).request_body | ✅ |
+| (gnostic.openapi.v3.operation).responses | ✅ |
+| (gnostic.openapi.v3.operation).callbacks | ✅ |
+| (gnostic.openapi.v3.operation).deprecated  | ✅ |
+| (gnostic.openapi.v3.operation).security  | ✅ |
+| (gnostic.openapi.v3.operation).servers  | ✅ |
+| (gnostic.openapi.v3.operation).specification_extension | ✅ |
 
 A `request_body` replaces the request body generated from the method's input. There are two exceptions:
 
@@ -115,83 +115,83 @@ A `request_body` replaces the request body generated from the method's input. Th
 Media types that aren't listed are removed. A `reference` replaces the whole body.
 
 #### Message Options
-| Option | Supported? |
-|---|---|
-| (gnostic.openapi.v3.schema).nullable | ✅ |
-| (gnostic.openapi.v3.schema).discriminator | ✅ |
-| (gnostic.openapi.v3.schema).read_only | ✅ |
-| (gnostic.openapi.v3.schema).write_only | ✅ |
-| (gnostic.openapi.v3.schema).xml | ✅ |
-| (gnostic.openapi.v3.schema).external_docs | ✅ |
-| (gnostic.openapi.v3.schema).example | ✅ |
-| (gnostic.openapi.v3.schema).deprecated | ✅ |
-| (gnostic.openapi.v3.schema).title | ✅ |
-| (gnostic.openapi.v3.schema).multiple_of | ✅ |
-| (gnostic.openapi.v3.schema).maximum | ✅ |
-| (gnostic.openapi.v3.schema).exclusive_maximum | ✅ |
-| (gnostic.openapi.v3.schema).minimum | ✅ |
-| (gnostic.openapi.v3.schema).exclusive_minimum | ✅ |
-| (gnostic.openapi.v3.schema).max_length | ✅ |
-| (gnostic.openapi.v3.schema).min_length | ✅ |
-| (gnostic.openapi.v3.schema).pattern | ✅ |
-| (gnostic.openapi.v3.schema).max_items | ✅ |
-| (gnostic.openapi.v3.schema).min_items | ✅ |
-| (gnostic.openapi.v3.schema).unique_items | ✅ |
-| (gnostic.openapi.v3.schema).max_properties | ✅ |
-| (gnostic.openapi.v3.schema).min_properties | ✅ |
-| (gnostic.openapi.v3.schema).string required | ✅ |
-| (gnostic.openapi.v3.schema).Any | ✅ |
-| (gnostic.openapi.v3.schema).type | ✅ |
-| (gnostic.openapi.v3.schema).all_of | ✅ |
-| (gnostic.openapi.v3.schema).one_of | ✅ |
-| (gnostic.openapi.v3.schema).any_of | ✅ |
-| (gnostic.openapi.v3.schema).not | ✅ |
-| (gnostic.openapi.v3.schema).items | ✅ |
-| (gnostic.openapi.v3.schema).properties | ✅ |
-| (gnostic.openapi.v3.schema).additional_properties | ✅ |
-| (gnostic.openapi.v3.schema).default | ✅ |
-| (gnostic.openapi.v3.schema).description | ✅ |
-| (gnostic.openapi.v3.schema).format | ✅ |
-| (gnostic.openapi.v3.schema).specification_extension | ✅ |
+| Option | Supported? | Notes |
+|---|---|---|
+| (gnostic.openapi.v3.schema).nullable | ✅ | Adds `null` to `type`. Only `true` can be set |
+| (gnostic.openapi.v3.schema).discriminator | ✅ | |
+| (gnostic.openapi.v3.schema).read_only | ✅ | Only `true` can be set |
+| (gnostic.openapi.v3.schema).write_only | ✅ | Only `true` can be set |
+| (gnostic.openapi.v3.schema).xml | ✅ | |
+| (gnostic.openapi.v3.schema).external_docs | ✅ | |
+| (gnostic.openapi.v3.schema).example | ✅ | YAML only; a protobuf `Any` value is ignored |
+| (gnostic.openapi.v3.schema).deprecated | ✅ | Only `true` can be set |
+| (gnostic.openapi.v3.schema).title | ✅ | |
+| (gnostic.openapi.v3.schema).multiple_of | ✅ | |
+| (gnostic.openapi.v3.schema).maximum | ✅ | `0` can't be set |
+| (gnostic.openapi.v3.schema).exclusive_maximum | ✅ | Needs a nonzero `maximum` |
+| (gnostic.openapi.v3.schema).minimum | ✅ | `0` can't be set |
+| (gnostic.openapi.v3.schema).exclusive_minimum | ✅ | Needs a nonzero `minimum` |
+| (gnostic.openapi.v3.schema).max_length | ✅ | |
+| (gnostic.openapi.v3.schema).min_length | ✅ | |
+| (gnostic.openapi.v3.schema).pattern | ✅ | |
+| (gnostic.openapi.v3.schema).max_items | ✅ | Only for an `array` type |
+| (gnostic.openapi.v3.schema).min_items | ✅ | Only for an `array` type |
+| (gnostic.openapi.v3.schema).unique_items | ✅ | Only for an `array` type |
+| (gnostic.openapi.v3.schema).max_properties | ✅ | Only for an `object` type |
+| (gnostic.openapi.v3.schema).min_properties | ✅ | Only for an `object` type |
+| (gnostic.openapi.v3.schema).required | ✅ | |
+| (gnostic.openapi.v3.schema).enum | ✅ | |
+| (gnostic.openapi.v3.schema).type | ✅ | Keeps `null` if the field is nullable |
+| (gnostic.openapi.v3.schema).all_of | ✅ | |
+| (gnostic.openapi.v3.schema).one_of | ✅ | |
+| (gnostic.openapi.v3.schema).any_of | ✅ | |
+| (gnostic.openapi.v3.schema).not | ✅ | |
+| (gnostic.openapi.v3.schema).items | ✅ | |
+| (gnostic.openapi.v3.schema).properties | ✅ | |
+| (gnostic.openapi.v3.schema).additional_properties | ✅ | |
+| (gnostic.openapi.v3.schema).default | ✅ | |
+| (gnostic.openapi.v3.schema).description | ✅ | |
+| (gnostic.openapi.v3.schema).format | ✅ | |
+| (gnostic.openapi.v3.schema).specification_extension | ✅ | |
 
 #### Field Options
-| Option | Supported? |
-|---|---|
-| (gnostic.openapi.v3.property).nullable | ✅ |
-| (gnostic.openapi.v3.property).discriminator | ✅ |
-| (gnostic.openapi.v3.property).read_only | ✅ |
-| (gnostic.openapi.v3.property).write_only | ✅ |
-| (gnostic.openapi.v3.property).xml | ✅ |
-| (gnostic.openapi.v3.property).external_docs | ✅ |
-| (gnostic.openapi.v3.property).example | ✅ |
-| (gnostic.openapi.v3.property).deprecated | ✅ |
-| (gnostic.openapi.v3.property).title | ✅ |
-| (gnostic.openapi.v3.property).multiple_of | ✅ |
-| (gnostic.openapi.v3.property).maximum | ✅ |
-| (gnostic.openapi.v3.property).exclusive_maximum | ✅ |
-| (gnostic.openapi.v3.property).minimum | ✅ |
-| (gnostic.openapi.v3.property).exclusive_minimum | ✅ |
-| (gnostic.openapi.v3.property).max_length | ✅ |
-| (gnostic.openapi.v3.property).min_length | ✅ |
-| (gnostic.openapi.v3.property).pattern | ✅ |
-| (gnostic.openapi.v3.property).max_items | ✅ |
-| (gnostic.openapi.v3.property).min_items | ✅ |
-| (gnostic.openapi.v3.property).unique_items | ✅ |
-| (gnostic.openapi.v3.property).max_properties | ✅ |
-| (gnostic.openapi.v3.property).min_properties | ✅ |
-| (gnostic.openapi.v3.property).string required | ✅ |
-| (gnostic.openapi.v3.property).Any | ✅ |
-| (gnostic.openapi.v3.property).type | ✅ |
-| (gnostic.openapi.v3.property).all_of | ✅ |
-| (gnostic.openapi.v3.property).one_of | ✅ |
-| (gnostic.openapi.v3.property).any_of | ✅ |
-| (gnostic.openapi.v3.property).not | ✅ |
-| (gnostic.openapi.v3.property).items | ✅ |
-| (gnostic.openapi.v3.property).properties | ✅ |
-| (gnostic.openapi.v3.property).additional_properties | ✅ |
-| (gnostic.openapi.v3.property).default | ✅ |
-| (gnostic.openapi.v3.property).description | ✅ |
-| (gnostic.openapi.v3.property).format | ✅ |
-| (gnostic.openapi.v3.property).specification_extension | ✅ |
+| Option | Supported? | Notes |
+|---|---|---|
+| (gnostic.openapi.v3.property).nullable | ✅ | Adds `null` to `type`. Only `true` can be set |
+| (gnostic.openapi.v3.property).discriminator | ✅ | |
+| (gnostic.openapi.v3.property).read_only | ✅ | Only `true` can be set |
+| (gnostic.openapi.v3.property).write_only | ✅ | Only `true` can be set |
+| (gnostic.openapi.v3.property).xml | ✅ | |
+| (gnostic.openapi.v3.property).external_docs | ✅ | |
+| (gnostic.openapi.v3.property).example | ✅ | YAML only; a protobuf `Any` value is ignored |
+| (gnostic.openapi.v3.property).deprecated | ✅ | Only `true` can be set |
+| (gnostic.openapi.v3.property).title | ✅ | |
+| (gnostic.openapi.v3.property).multiple_of | ✅ | |
+| (gnostic.openapi.v3.property).maximum | ✅ | `0` can't be set |
+| (gnostic.openapi.v3.property).exclusive_maximum | ✅ | Needs a nonzero `maximum` |
+| (gnostic.openapi.v3.property).minimum | ✅ | `0` can't be set |
+| (gnostic.openapi.v3.property).exclusive_minimum | ✅ | Needs a nonzero `minimum` |
+| (gnostic.openapi.v3.property).max_length | ✅ | |
+| (gnostic.openapi.v3.property).min_length | ✅ | |
+| (gnostic.openapi.v3.property).pattern | ✅ | |
+| (gnostic.openapi.v3.property).max_items | ✅ | Only for an `array` type |
+| (gnostic.openapi.v3.property).min_items | ✅ | Only for an `array` type |
+| (gnostic.openapi.v3.property).unique_items | ✅ | Only for an `array` type |
+| (gnostic.openapi.v3.property).max_properties | ✅ | Only for an `object` type |
+| (gnostic.openapi.v3.property).min_properties | ✅ | Only for an `object` type |
+| (gnostic.openapi.v3.property).required | ✅ | |
+| (gnostic.openapi.v3.property).enum | ✅ | |
+| (gnostic.openapi.v3.property).type | ✅ | Keeps `null` if the field is nullable |
+| (gnostic.openapi.v3.property).all_of | ✅ | |
+| (gnostic.openapi.v3.property).one_of | ✅ | |
+| (gnostic.openapi.v3.property).any_of | ✅ | |
+| (gnostic.openapi.v3.property).not | ✅ | |
+| (gnostic.openapi.v3.property).items | ✅ | |
+| (gnostic.openapi.v3.property).properties | ✅ | |
+| (gnostic.openapi.v3.property).additional_properties | ✅ | |
+| (gnostic.openapi.v3.property).default | ✅ | |
+| (gnostic.openapi.v3.property).description | ✅ | |
+| (gnostic.openapi.v3.property).format | ✅ | |
+| (gnostic.openapi.v3.property).specification_extension | ✅ | |
 
-For more information on how to use each option in your Protobuf file, you can reference [the gnostic.openapi.v3 module documentation](https://buf.build/gnostic/gnostic/docs/main:gnostic.openapi.v3) and the [google/gnostic repo](https://github.com/google/gnostic). Note that this is a new feature, so if find something that isn't supported that you need, please [create an issue](https://github.com/connectrpc/protoc-gen-connect-openapi/issues/new).
+For more information on how to use each option in your Protobuf file, you can reference [the gnostic.openapi.v3 module documentation](https://buf.build/gnostic/gnostic/docs/main:gnostic.openapi.v3) and the [google/gnostic repo](https://github.com/google/gnostic). If you need something that isn't supported, please [create an issue](https://github.com/connectrpc/protoc-gen-connect-openapi/issues/new).

@@ -1,31 +1,34 @@
 # Remote Plugin Usage
 
-`protoc-gen-connect-openapi` can be used as a remote plugin with tools like `buf`. However, when running in a remote context, there are certain security restrictions that apply. Specifically, remote plugins are not allowed to access the local filesystem or network.
+`protoc-gen-connect-openapi` is available as a [remote plugin](https://buf.build/docs/bsr/remote-plugins/usage/) on the Buf Schema Registry, so you can generate OpenAPI files with `buf generate` without installing anything:
 
-For more details on these restrictions, please see the Buf documentation on custom plugin requirements.
+```yaml
+version: v2
+plugins:
+  - remote: buf.build/community/sudorandom-connect-openapi:v0.28.0
+    out: gen
+```
+
+Remote plugins run on the BSR, so they can't read files from your machine.
 
 ## Disabled Options
 
-Due to the filesystem access restrictions, the following options are disabled when using `protoc-gen-connect-openapi` as a remote plugin:
+Because remote plugins can't read your files, these options are disabled:
 
 | Option   | Description                                                                         |
 |----------|-------------------------------------------------------------------------------------|
 | `base`     | The path to a base OpenAPI file to populate fields that this tool doesn't populate. |
 | `override` | The path to an override OpenAPI file to override schema components.                 |
 
-Attempting to use these options with a remote plugin will result in an error.
+Using either option with the remote plugin fails with an error.
 
 ## Alternative: Gnostic Annotations
 
-As an alternative to using `base` and `override` files, you can use OpenAPI v3 annotations from the gnostic project. These annotations allow you to embed OpenAPI specification details directly within your `.proto` files.
-
-This approach is fully compatible with remote plugins as it doesn't require any filesystem access.
-
-For a comprehensive guide on all supported gnostic annotations, please see Gnostic Support.
+Instead of `base` and `override` files, you can put OpenAPI details in your `.proto` files with the OpenAPI v3 annotations from the gnostic project. They work with the remote plugin because they don't need any files. See [Gnostic Support](gnostic.md) for every supported annotation.
 
 ### Example
 
-Here is a small example of how you can use gnostic annotations to define top-level document information, which is a common use case for a `base` file.
+This sets the document's `info`, which is a common reason to use a `base` file:
 
 ```protobuf
 syntax = "proto3";
@@ -56,8 +59,8 @@ service MyService {
 }
 ```
 
-By using these annotations, you can achieve the same level of customization as with `base` and `override` files, while remaining compatible with the remote plugin execution environment. For more about gnostic annotations, see [the page about using gnostic with protoc-gen-connect-openapi](gnostic.md).
+Annotations cover most of what `base` and `override` files do. They can't change messages you don't own, such as well-known types or messages from dependencies, which an `override` file can replace.
 
 ## Alternative: Using a local plugin
 
-You can always use a local plugin if you absolutely need these options. See the [README](README.md) for more information.
+If you need `base` or `override`, use a local plugin. See the [README](README.md#install) for how to install it.

@@ -1,0 +1,63 @@
+// Copyright 2023-2026 The Connect Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package standard;
+
+import "google/api/annotations.proto";
+
+// A custom rule becomes an operation when OpenAPI has one for its method.
+service CustomMethodsService {
+  rpc CheckDocument(CheckDocumentRequest) returns (CheckDocumentResponse) {
+    option (google.api.http) = {
+      custom: {
+        kind: "HEAD"
+        path: "/v1/documents/{id}"
+      }
+      additional_bindings: {
+        custom: {
+          kind: "options"
+          path: "/v1/documents/{id}"
+        }
+      }
+    };
+  }
+  rpc TraceDocument(CheckDocumentRequest) returns (CheckDocumentResponse) {
+    option (google.api.http) = {
+      custom: {
+        kind: "TRACE"
+        path: "/v1/documents/{id}:trace"
+      }
+    };
+  }
+  // OpenAPI has no operation for this method, so the rule is skipped and
+  // the method is documented at its Connect route.
+  rpc LockDocument(CheckDocumentRequest) returns (CheckDocumentResponse) {
+    option (google.api.http) = {
+      custom: {
+        kind: "LOCK"
+        path: "/v1/documents/{id}:lock"
+      }
+    };
+  }
+}
+
+message CheckDocumentRequest {
+  string id = 1;
+}
+
+message CheckDocumentResponse {
+  string etag = 1;
+}

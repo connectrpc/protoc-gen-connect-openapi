@@ -136,6 +136,17 @@ func schemaWithAnnotations(opts options.Options, schema *base.Schema, gnosticSch
 	if gnosticSchema.Pattern != "" {
 		schema.Pattern = gnosticSchema.Pattern
 	}
+	if gnosticSchema.Type != "" {
+		// The type is set before the keywords below that depend on it.
+		// Overriding the type keeps nullability, whether it came from the
+		// field (proto3 optional) or from nullable above.
+		nullable := slices.Contains(schema.Type, "null")
+		schema.Type = []string{gnosticSchema.Type}
+		if nullable {
+			schema.Type = append(schema.Type, "null")
+		}
+	}
+
 	if gnosticSchema.MaxItems > 0 {
 		if slices.Contains(schema.Type, "array") {
 			schema.MaxItems = &gnosticSchema.MaxItems
@@ -171,16 +182,6 @@ func schemaWithAnnotations(opts options.Options, schema *base.Schema, gnosticSch
 		}
 		schema.Enum = enums
 	}
-	if gnosticSchema.Type != "" {
-		// Overriding the type keeps nullability, whether it came from the
-		// field (proto3 optional) or from nullable above.
-		nullable := slices.Contains(schema.Type, "null")
-		schema.Type = []string{gnosticSchema.Type}
-		if nullable {
-			schema.Type = append(schema.Type, "null")
-		}
-	}
-
 	if gnosticSchema.AdditionalProperties != nil {
 		switch v := gnosticSchema.AdditionalProperties.GetOneof().(type) {
 		case *goa3.AdditionalPropertiesItem_SchemaOrReference:
