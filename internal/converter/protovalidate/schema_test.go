@@ -22,6 +22,7 @@ import (
 	"github.com/pb33f/libopenapi/datamodel/high/base"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
@@ -122,4 +123,46 @@ func TestUpdateSchemaRules(t *testing.T) {
 
 		assert.Empty(t, schema.Description)
 	})
+}
+
+func TestMapKeyRules(t *testing.T) {
+	t.Parallel()
+	stringKeys := &validate.FieldRules{Type: &validate.FieldRules_String_{String_: &validate.StringRules{
+		Pattern: proto.String("^[a-z]+$"),
+		MaxLen:  proto.Uint64(10),
+	}}}
+	for _, tc := range []struct {
+		name string
+		keys *validate.FieldRules
+		desc protoreflect.FieldDescriptor
+		want string
+	}{
+		{
+			name: "string keys",
+			keys: stringKeys,
+			desc: mapField,
+			want: "type: object\npropertyNames:\n    type: string\n    maxLength: 10\n    pattern: ^[a-z]+$\n",
+		},
+		{
+			name: "key rules without a keyword",
+			keys: &validate.FieldRules{Type: &validate.FieldRules_String_{String_: &validate.StringRules{}}},
+			desc: mapField,
+			want: "type: object\n",
+		},
+		{
+			name: "unknown field",
+			keys: stringKeys,
+			want: "type: object\n",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			schema := &base.Schema{Type: []string{"object"}}
+			rules := &validate.FieldRules{Type: &validate.FieldRules_Map{Map: &validate.MapRules{
+				Keys: proto.CloneOf(tc.keys),
+			}}}
+			updateSchemaWithFieldRules(options.NewOptions(), schema, rules, false, tc.desc)
+			assert.Equal(t, tc.want, marshalSchema(t, schema))
+		})
+	}
 }

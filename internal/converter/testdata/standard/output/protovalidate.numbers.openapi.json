@@ -148,9 +148,16 @@
         "properties": {
           "val": {
             "type": "number",
+            "anyOf": [
+              {
+                "maximum": 256,
+                "minimum": 128
+              },
+              {
+                "const": 0
+              }
+            ],
             "title": "val",
-            "maximum": 256,
-            "minimum": 128,
             "format": "double"
           }
         },
@@ -386,9 +393,16 @@
         "properties": {
           "val": {
             "type": "integer",
-            "title": "val",
-            "maximum": 256,
-            "minimum": 128
+            "anyOf": [
+              {
+                "maximum": 256,
+                "minimum": 128
+              },
+              {
+                "const": 0
+              }
+            ],
+            "title": "val"
           }
         },
         "title": "Fixed32Ignore",
@@ -817,9 +831,16 @@
         "properties": {
           "val": {
             "type": "number",
+            "anyOf": [
+              {
+                "maximum": 256,
+                "minimum": 128
+              },
+              {
+                "const": 0
+              }
+            ],
             "title": "val",
-            "maximum": 256,
-            "minimum": 128,
             "format": "float"
           }
         },
@@ -1063,9 +1084,16 @@
         "properties": {
           "val": {
             "type": "integer",
+            "anyOf": [
+              {
+                "maximum": 256,
+                "minimum": 128
+              },
+              {
+                "const": 0
+              }
+            ],
             "title": "val",
-            "maximum": 256,
-            "minimum": 128,
             "format": "int32"
           }
         },
@@ -1580,9 +1608,16 @@
         "properties": {
           "val": {
             "type": "integer",
+            "anyOf": [
+              {
+                "maximum": 256,
+                "minimum": 128
+              },
+              {
+                "const": 0
+              }
+            ],
             "title": "val",
-            "maximum": 256,
-            "minimum": 128,
             "format": "int32"
           }
         },
@@ -1993,9 +2028,16 @@
         "properties": {
           "val": {
             "type": "integer",
+            "anyOf": [
+              {
+                "maximum": 256,
+                "minimum": 128
+              },
+              {
+                "const": 0
+              }
+            ],
             "title": "val",
-            "maximum": 256,
-            "minimum": 128,
             "format": "int32"
           }
         },
@@ -2398,9 +2440,16 @@
         "properties": {
           "val": {
             "type": "integer",
-            "title": "val",
-            "maximum": 256,
-            "minimum": 128
+            "anyOf": [
+              {
+                "maximum": 256,
+                "minimum": 128
+              },
+              {
+                "const": 0
+              }
+            ],
+            "title": "val"
           }
         },
         "title": "UInt32Ignore",

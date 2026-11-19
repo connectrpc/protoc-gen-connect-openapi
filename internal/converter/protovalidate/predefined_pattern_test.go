@@ -160,3 +160,62 @@ func TestRuleEnabled(t *testing.T) {
 	assert.False(t, ruleEnabled(protoreflect.ValueOfBool(false), unique))
 	assert.False(t, ruleEnabled(protoreflect.ValueOfUint64(1), minItems))
 }
+
+func TestPassesWhenRuleIsFalse(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name       string
+		expression string
+		want       bool
+	}{
+		{name: "guard first", expression: `!rule || this.matches('^a$')`, want: true},
+		{name: "guard last", expression: `this.matches('^a$') || !rule`, want: true},
+		{name: "guard among several operands", expression: `!rule || this == '' || this.size() > 3`, want: true},
+		{name: "built-in guard", expression: `!rules.uuid || this == '' || this.size() > 3`, want: true},
+		{name: "built-in guard of another rule", expression: `!rules.email || this.size() > 3`},
+		{name: "no guard", expression: `this.matches('^a$')`},
+		{name: "rule without negation", expression: `rule || this.size() > 3`},
+		{name: "guard inside a conjunction", expression: `!rule && this.size() > 3`},
+		{name: "guard below a conjunction", expression: `(!rule || this.size() > 3) && this != ''`},
+		{name: "rule compared", expression: `this.size() <= rule`},
+		{name: "invalid CEL", expression: `!rule ||`},
+		{name: "empty", expression: ``},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tt.want, passesWhenRuleIsFalse(tt.expression, "uuid"))
+		})
+	}
+}
+
+func TestEnabledPredefinedRules(t *testing.T) {
+	t.Parallel()
+	rule := func(id, expression string) *validate.Rule {
+		r := &validate.Rule{}
+		r.SetId(id)
+		r.SetExpression(expression)
+		return r
+	}
+	ids := func(rules []*validate.Rule) []string {
+		var result []string
+		for _, r := range rules {
+			result = append(result, r.GetId())
+		}
+		return result
+	}
+	fields := (&validate.RepeatedRules{}).ProtoReflect().Descriptor().Fields()
+	unique := fields.ByName("unique")      // bool
+	minItems := fields.ByName("min_items") // uint64
+	rules := []*validate.Rule{
+		rule("guarded", `!rule || this.size() > 3`),
+		rule("unguarded", `this.size() > 3`),
+	}
+
+	// A rule set to false keeps only what can still fail.
+	assert.Equal(t, []string{"unguarded"}, ids(enabledPredefinedRules(rules, protoreflect.ValueOfBool(false), unique)))
+	assert.Equal(t, []string{"guarded", "unguarded"}, ids(enabledPredefinedRules(rules, protoreflect.ValueOfBool(true), unique)))
+	assert.Equal(t, []string{"guarded", "unguarded"}, ids(enabledPredefinedRules(rules, protoreflect.ValueOfUint64(0), minItems)))
+	// The rules passed in are left as they were.
+	assert.Equal(t, []string{"guarded", "unguarded"}, ids(rules))
+}

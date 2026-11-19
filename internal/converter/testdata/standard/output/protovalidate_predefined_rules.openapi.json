@@ -45,8 +45,7 @@
           },
           "disabledHex": {
             "type": "string",
-            "title": "disabled_hex",
-            "description": "must be lowercase hex\n"
+            "title": "disabled_hex"
           },
           "standardWins": {
             "type": "string",

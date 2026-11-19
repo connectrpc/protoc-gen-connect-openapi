@@ -518,6 +518,51 @@ message LotsOfValidationRules {
 
   bool bool_const_true = 260 [(buf.validate.field).bool.const = true];
   bool bool_const_false = 261 [(buf.validate.field).bool.const = false];
+
+  // IGNORE_IF_ZERO_VALUE skips the rules for the zero value, so the schema
+  // accepts the zero value as well as the values the rules allow.
+  string ignore_pattern = 270 [
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    (buf.validate.field).string.pattern = "^[a-z]+$"
+  ];
+  repeated string ignore_min_items = 271 [
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    (buf.validate.field).repeated.min_items = 2
+  ];
+  map<string, string> ignore_min_pairs = 272 [
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    (buf.validate.field).map.min_pairs = 2
+  ];
+  MyEnum ignore_enum_in = 273 [
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    (buf.validate.field).enum = {
+      in: [2]
+    }
+  ];
+  repeated string ignore_items = 274 [(buf.validate.field).repeated.items = {
+    ignore: IGNORE_IF_ZERO_VALUE
+    string: {min_len: 3}
+  }];
+  // The zero value always satisfies a maximum length.
+  string ignore_max_len = 275 [
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    (buf.validate.field).string.max_len = 10
+  ];
+
+  // IGNORE_ALWAYS turns off the field's rules, including required.
+  string ignore_always = 276 [
+    (buf.validate.field).ignore = IGNORE_ALWAYS,
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 3
+  ];
+
+  // The rules of string keys apply to the property names.
+  map<string, string> map_key_pattern = 280 [(buf.validate.field).map.keys.string.pattern = "^[a-z]+$"];
+  // Keys of other types are strings in JSON, so their rules aren't rendered.
+  map<int32, string> map_int_keys = 281 [(buf.validate.field).map.keys.int32.gt = 0];
+
+  // A boolean rule set to false doesn't apply, so it isn't described.
+  string uuid_off = 290 [(buf.validate.field).string.uuid = false];
 }
 
 message MyOtherMessage {}

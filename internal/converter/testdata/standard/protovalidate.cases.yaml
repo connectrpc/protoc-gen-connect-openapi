@@ -76,3 +76,115 @@ cases:
       Connect-Protocol-Version: 1
     errors:
       - ".*"
+
+  - name: "ignore-pattern-zero-value"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignorePattern": ""}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+
+  - name: "ignore-pattern-match"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignorePattern": "abc"}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+
+  - name: "ignore-pattern-mismatch"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignorePattern": "ABC"}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+    errors:
+      - ".*"
+
+  - name: "ignore-min-items-empty"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignoreMinItems": []}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+
+  - name: "ignore-min-items-too-few"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignoreMinItems": ["a"]}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+    errors:
+      - ".*"
+
+  - name: "ignore-min-pairs-empty"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignoreMinPairs": {}}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+
+  - name: "ignore-min-pairs-too-few"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignoreMinPairs": {"a": "b"}}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+    errors:
+      - ".*"
+
+  - name: "ignore-enum-in-zero-value"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignoreEnumIn": "MY_ENUM_UNSPECIFIED"}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+
+  - name: "ignore-enum-in-other-value"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignoreEnumIn": "MY_ENUM_VALUE1"}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+    errors:
+      - ".*"
+
+  - name: "ignore-items-zero-value"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignoreItems": ["", "abc"]}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+
+  - name: "ignore-items-too-short"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "ignoreItems": ["ab"]}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+    errors:
+      - ".*"
+
+  - name: "map-key-pattern-match"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "mapKeyPattern": {"abc": "x"}}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+
+  - name: "map-key-pattern-mismatch"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "mapKeyPattern": {"ABC": "x"}}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+    errors:
+      - ".*"
+
+  - name: "map-keys-too-short"
+    path: "/protovalidate.FieldsService/CELRPC"
+    body: '{"requiredField": {}, "mapKeys": {"ab": "x"}}'
+    headers:
+      Content-Type: application/json
+      Connect-Protocol-Version: 1
+    errors:
+      - ".*"

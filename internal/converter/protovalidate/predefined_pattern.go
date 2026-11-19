@@ -48,21 +48,65 @@ func extractMatchesPattern(expression string) (pattern string, guarded, ok bool)
 	if !strings.Contains(expression, overloads.Matches) {
 		return "", false, false
 	}
-	env, err := celParseEnv()
-	if err != nil {
+	root, ok := parseExpression(expression)
+	if !ok {
 		return "", false, false
 	}
-	parsed, issues := env.Parse(expression)
-	if issues != nil && issues.Err() != nil {
-		return "", false, false
-	}
-	root := parsed.NativeRep().Expr()
 
 	if args, ok := callArgs(root, operators.LogicalOr, 2); ok && isNegatedRule(args[0]) {
 		guarded, root = true, args[1]
 	}
 	pattern, ok = matchesLiteral(root)
 	return pattern, guarded && ok, ok
+}
+
+// parseExpression parses a CEL expression without type-checking it.
+func parseExpression(expression string) (ast.Expr, bool) {
+	env, err := celParseEnv()
+	if err != nil {
+		return nil, false
+	}
+	parsed, issues := env.Parse(expression)
+	if issues != nil && issues.Err() != nil {
+		return nil, false
+	}
+	return parsed.NativeRep().Expr(), true
+}
+
+// passesWhenRuleIsFalse reports whether an expression has `!rule` as an
+// operand of a top-level `||`, so it always passes when the rule's value is
+// false. Built-in rules write the same guard as `!rules.<name>`, where name is
+// the rule's field name.
+func passesWhenRuleIsFalse(expression, name string) bool {
+	// Cheap pre-check, as in extractMatchesPattern.
+	if !strings.Contains(expression, "rule") {
+		return false
+	}
+	root, ok := parseExpression(expression)
+	if !ok {
+		return false
+	}
+	return slices.ContainsFunc(orOperands(root), func(operand ast.Expr) bool {
+		if isNegatedRule(operand) {
+			return true
+		}
+		args, ok := callArgs(operand, operators.LogicalNot, 1)
+		if !ok || args[0].Kind() != ast.SelectKind {
+			return false
+		}
+		selected := args[0].AsSelect()
+		return isIdent(selected.Operand(), "rules") && selected.FieldName() == name
+	})
+}
+
+// orOperands returns the operands of e's top-level `||` chain, or e itself
+// if it isn't one.
+func orOperands(e ast.Expr) []ast.Expr {
+	args, ok := callArgs(e, operators.LogicalOr, 2)
+	if !ok {
+		return []ast.Expr{e}
+	}
+	return append(orOperands(args[0]), orOperands(args[1])...)
 }
 
 // callArgs returns the arguments of e if it is a call of function with
@@ -125,6 +169,18 @@ func updateSchemaWithPredefinedPattern(schema *base.Schema, rules []*validate.Ru
 		schema.Pattern = pattern
 		return
 	}
+}
+
+// enabledPredefinedRules returns the rules that can fail for the rule's value.
+// A boolean rule set to false leaves out the rules it guards with `!rule ||`,
+// since they always pass.
+func enabledPredefinedRules(rules []*validate.Rule, val protoreflect.Value, fieldDesc protoreflect.FieldDescriptor) []*validate.Rule {
+	if fieldDesc.Kind() != protoreflect.BoolKind || fieldDesc.IsList() || val.Bool() {
+		return rules
+	}
+	return slices.DeleteFunc(slices.Clone(rules), func(rule *validate.Rule) bool {
+		return passesWhenRuleIsFalse(rule.GetExpression(), string(fieldDesc.Name()))
+	})
 }
 
 // ruleEnabled reports whether a predefined rule is a boolean set to true.

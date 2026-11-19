@@ -431,8 +431,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid hostname, or ip address\nvalue is empty, which is not a valid hostname, or ip address\n"
+            "title": "val"
           }
         },
         "title": "StringNotAddress",
@@ -455,8 +454,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid email address\nvalue is empty, which is not a valid email address\n"
+            "title": "val"
           }
         },
         "title": "StringNotEmail",
@@ -467,8 +465,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid hostname\nvalue is empty, which is not a valid hostname\n"
+            "title": "val"
           }
         },
         "title": "StringNotHostname",
@@ -479,8 +476,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid IP address\nvalue is empty, which is not a valid IP address\n"
+            "title": "val"
           }
         },
         "title": "StringNotIP",
@@ -491,8 +487,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid IP prefix\nvalue is empty, which is not a valid IP prefix\n"
+            "title": "val"
           }
         },
         "title": "StringNotIPPrefix",
@@ -503,8 +498,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid IP prefix\nvalue is empty, which is not a valid IP prefix\n"
+            "title": "val"
           }
         },
         "title": "StringNotIPWithPrefixLen",
@@ -515,8 +509,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid IPv4 address\nvalue is empty, which is not a valid IPv4 address\n"
+            "title": "val"
           }
         },
         "title": "StringNotIPv4",
@@ -527,8 +520,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid IPv4 prefix\nvalue is empty, which is not a valid IPv4 prefix\n"
+            "title": "val"
           }
         },
         "title": "StringNotIPv4Prefix",
@@ -539,8 +531,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid IPv4 address with prefix length\nvalue is empty, which is not a valid IPv4 address with prefix length\n"
+            "title": "val"
           }
         },
         "title": "StringNotIPv4WithPrefixLen",
@@ -551,8 +542,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid IPv6 address\nvalue is empty, which is not a valid IPv6 address\n"
+            "title": "val"
           }
         },
         "title": "StringNotIPv6",
@@ -563,8 +553,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid IPv6 prefix\nvalue is empty, which is not a valid IPv6 prefix\n"
+            "title": "val"
           }
         },
         "title": "StringNotIPv6Prefix",
@@ -575,8 +564,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid IPv6 address with prefix length\nvalue is empty, which is not a valid IPv6 address with prefix length\n"
+            "title": "val"
           }
         },
         "title": "StringNotIPv6WithPrefixLen",
@@ -605,8 +593,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid trimmed UUID\nvalue is empty, which is not a valid trimmed UUID\n"
+            "title": "val"
           }
         },
         "title": "StringNotTUUID",
@@ -617,8 +604,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid URI\nvalue is empty, which is not a valid URI\n"
+            "title": "val"
           }
         },
         "title": "StringNotURI",
@@ -629,8 +615,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid URI Reference\n"
+            "title": "val"
           }
         },
         "title": "StringNotURIRef",
@@ -641,8 +626,7 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "description": "must be a valid UUID\nvalue is empty, which is not a valid UUID\n"
+            "title": "val"
           }
         },
         "title": "StringNotUUID",
@@ -765,8 +749,15 @@
         "properties": {
           "val": {
             "type": "string",
-            "title": "val",
-            "format": "uuid"
+            "anyOf": [
+              {
+                "format": "uuid"
+              },
+              {
+                "const": ""
+              }
+            ],
+            "title": "val"
           }
         },
         "title": "StringUUIDIgnore",

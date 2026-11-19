@@ -360,9 +360,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid hostname, or ip address
-            value is empty, which is not a valid hostname, or ip address
       title: StringNotAddress
       additionalProperties: false
     buf.validate.conformance.cases.StringNotContains:
@@ -381,9 +378,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid email address
-            value is empty, which is not a valid email address
       title: StringNotEmail
       additionalProperties: false
     buf.validate.conformance.cases.StringNotHostname:
@@ -392,9 +386,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid hostname
-            value is empty, which is not a valid hostname
       title: StringNotHostname
       additionalProperties: false
     buf.validate.conformance.cases.StringNotIP:
@@ -403,9 +394,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid IP address
-            value is empty, which is not a valid IP address
       title: StringNotIP
       additionalProperties: false
     buf.validate.conformance.cases.StringNotIPPrefix:
@@ -414,9 +402,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid IP prefix
-            value is empty, which is not a valid IP prefix
       title: StringNotIPPrefix
       additionalProperties: false
     buf.validate.conformance.cases.StringNotIPWithPrefixLen:
@@ -425,9 +410,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid IP prefix
-            value is empty, which is not a valid IP prefix
       title: StringNotIPWithPrefixLen
       additionalProperties: false
     buf.validate.conformance.cases.StringNotIPv4:
@@ -436,9 +418,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid IPv4 address
-            value is empty, which is not a valid IPv4 address
       title: StringNotIPv4
       additionalProperties: false
     buf.validate.conformance.cases.StringNotIPv4Prefix:
@@ -447,9 +426,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid IPv4 prefix
-            value is empty, which is not a valid IPv4 prefix
       title: StringNotIPv4Prefix
       additionalProperties: false
     buf.validate.conformance.cases.StringNotIPv4WithPrefixLen:
@@ -458,9 +434,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid IPv4 address with prefix length
-            value is empty, which is not a valid IPv4 address with prefix length
       title: StringNotIPv4WithPrefixLen
       additionalProperties: false
     buf.validate.conformance.cases.StringNotIPv6:
@@ -469,9 +442,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid IPv6 address
-            value is empty, which is not a valid IPv6 address
       title: StringNotIPv6
       additionalProperties: false
     buf.validate.conformance.cases.StringNotIPv6Prefix:
@@ -480,9 +450,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid IPv6 prefix
-            value is empty, which is not a valid IPv6 prefix
       title: StringNotIPv6Prefix
       additionalProperties: false
     buf.validate.conformance.cases.StringNotIPv6WithPrefixLen:
@@ -491,9 +458,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid IPv6 address with prefix length
-            value is empty, which is not a valid IPv6 address with prefix length
       title: StringNotIPv6WithPrefixLen
       additionalProperties: false
     buf.validate.conformance.cases.StringNotIn:
@@ -515,9 +479,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid trimmed UUID
-            value is empty, which is not a valid trimmed UUID
       title: StringNotTUUID
       additionalProperties: false
     buf.validate.conformance.cases.StringNotURI:
@@ -526,9 +487,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid URI
-            value is empty, which is not a valid URI
       title: StringNotURI
       additionalProperties: false
     buf.validate.conformance.cases.StringNotURIRef:
@@ -537,8 +495,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid URI Reference
       title: StringNotURIRef
       additionalProperties: false
     buf.validate.conformance.cases.StringNotUUID:
@@ -547,9 +503,6 @@ components:
         val:
           type: string
           title: val
-          description: |
-            must be a valid UUID
-            value is empty, which is not a valid UUID
       title: StringNotUUID
       additionalProperties: false
     buf.validate.conformance.cases.StringPattern:
@@ -649,8 +602,10 @@ components:
       properties:
         val:
           type: string
+          anyOf:
+            - format: uuid
+            - const: ""
           title: val
-          format: uuid
       title: StringUUIDIgnore
       additionalProperties: false
 security: []
