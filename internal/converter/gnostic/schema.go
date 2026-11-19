@@ -15,9 +15,11 @@
 package gnostic
 
 import (
-	"fmt"
+	"errors"
 	"log/slog"
 	"slices"
+	"strconv"
+	"strings"
 
 	"connectrpc.com/protoc-gen-connect-openapi/internal/converter/options"
 	"connectrpc.com/protoc-gen-connect-openapi/internal/converter/util"
@@ -85,18 +87,15 @@ func schemaWithAnnotations(opts options.Options, schema *base.Schema, gnosticSch
 		schema.WriteOnly = &gnosticSchema.WriteOnly
 	}
 	if gnosticSchema.Example != nil {
-		// If the example is defined with the YAML option
-		if gnosticSchema.Example.Yaml != "" {
-			var v string
-			if err := yaml.Unmarshal([]byte(gnosticSchema.Example.GetYaml()), &v); err != nil {
-				var node any
-				if err := yaml.Unmarshal([]byte(gnosticSchema.Example.GetYaml()), &node); err != nil {
-					opts.Logger.Warn("unable to unmarshal example", slog.Any("error", err))
-				} else {
-					schema.Examples = append(schema.Examples, expandExampleEntry(node))
-				}
+		// Decode as-is so scalars keep their YAML type.
+		if yamlText := gnosticSchema.Example.GetYaml(); yamlText != "" {
+			var node yaml.Node
+			if err := yaml.Unmarshal([]byte(yamlText), &node); err != nil {
+				opts.Logger.Warn("unable to unmarshal example", slog.Any("error", err))
+			} else if expanded, err := expandExampleEntry(&node); err != nil {
+				opts.Logger.Warn("unable to expand example", slog.Any("error", err))
 			} else {
-				schema.Examples = append(schema.Examples, utils.CreateStringNode(v))
+				schema.Examples = append(schema.Examples, expanded)
 			}
 		}
 		// If the example is defined with google.protobuf.Any
@@ -257,30 +256,215 @@ func schemaWithAnnotations(opts options.Options, schema *base.Schema, gnosticSch
 	return schema
 }
 
-func expandExampleEntry(entry any) *yaml.Node {
-	switch vv := entry.(type) {
-	//Handle mapping nodes
-	case map[any]any:
-		node := utils.CreateEmptyMapNode()
-		for k, v := range vv {
-			keyNode := utils.CreateStringNode(k.(string))
-			node.Content = append(node.Content, keyNode, expandExampleEntry(v))
-		}
-		return node
-	// Handle sequence nodes
-	case []any:
-		node := utils.CreateEmptySequenceNode()
-		for _, v := range vv {
-			node.Content = append(node.Content, expandExampleEntry(v))
-		}
-		return node
-	case float64:
-		return utils.CreateFloatNode(fmt.Sprintf("%v", vv))
-	case int:
-		return utils.CreateIntNode(fmt.Sprintf("%v", vv))
-	case string:
-		return utils.CreateStringNode(vv)
-	default:
-		return utils.CreateStringNode(fmt.Sprintf("%v", vv))
+const (
+	maxExampleDepth = 100
+	maxExampleNodes = 10_000
+)
+
+var errExampleLimit = errors.New("example contains a recursive alias or exceeds expansion limits")
+
+type exampleExpandState struct {
+	seenAliases map[*yaml.Node]bool
+	remaining   int
+}
+
+func expandExampleEntry(node *yaml.Node) (*yaml.Node, error) {
+	state := &exampleExpandState{
+		seenAliases: make(map[*yaml.Node]bool),
+		remaining:   maxExampleNodes,
 	}
+	return expandExampleNode(node, state, 0)
+}
+
+func expandExampleNode(node *yaml.Node, state *exampleExpandState, depth int) (*yaml.Node, error) {
+	if depth > maxExampleDepth || state.remaining <= 0 {
+		return nil, errExampleLimit
+	}
+	if node == nil {
+		return nullExampleNode(), nil
+	}
+	state.remaining--
+
+	switch node.Kind {
+	case yaml.DocumentNode:
+		if len(node.Content) == 1 {
+			return expandExampleNode(node.Content[0], state, depth+1)
+		}
+		return nullExampleNode(), nil
+	case yaml.MappingNode:
+		return expandExampleMapping(node, state, depth)
+	case yaml.SequenceNode:
+		out := utils.CreateEmptySequenceNode()
+		for _, child := range node.Content {
+			expanded, err := expandExampleNode(child, state, depth+1)
+			if err != nil {
+				return nil, err
+			}
+			out.Content = append(out.Content, expanded)
+		}
+		return out, nil
+	case yaml.AliasNode:
+		if node.Alias == nil || state.seenAliases[node.Alias] {
+			return nil, errExampleLimit
+		}
+		state.seenAliases[node.Alias] = true
+		expanded, err := expandExampleNode(node.Alias, state, depth+1)
+		delete(state.seenAliases, node.Alias)
+		if err != nil {
+			return nil, err
+		}
+		return expanded, nil
+	default:
+		return normalizeExampleScalar(node), nil
+	}
+}
+
+func expandExampleMapping(node *yaml.Node, state *exampleExpandState, depth int) (*yaml.Node, error) {
+	out := utils.CreateEmptyMapNode()
+	explicit := make(map[string]bool)
+	var merged []examplePair
+
+	for i := 0; i+1 < len(node.Content); i += 2 {
+		keyNode := node.Content[i]
+		valueNode := node.Content[i+1]
+		if keyNode.Tag == "!!merge" {
+			pairs, err := collectMergePairs(valueNode, state, depth+1)
+			if err != nil {
+				return nil, err
+			}
+			merged = append(merged, pairs...)
+			continue
+		}
+		key, err := expandExampleNode(keyNode, state, depth+1)
+		if err != nil {
+			return nil, err
+		}
+		value, err := expandExampleNode(valueNode, state, depth+1)
+		if err != nil {
+			return nil, err
+		}
+		explicit[exampleKeyID(key)] = true
+		out.Content = append(out.Content, key, value)
+	}
+
+	seenMerged := make(map[string]bool)
+	for _, pair := range merged {
+		id := exampleKeyID(pair.key)
+		if explicit[id] || seenMerged[id] {
+			continue
+		}
+		seenMerged[id] = true
+		out.Content = append(out.Content, pair.key, pair.value)
+	}
+	return out, nil
+}
+
+type examplePair struct {
+	key   *yaml.Node
+	value *yaml.Node
+}
+
+func collectMergePairs(node *yaml.Node, state *exampleExpandState, depth int) ([]examplePair, error) {
+	if depth > maxExampleDepth || state.remaining <= 0 {
+		return nil, errExampleLimit
+	}
+	if node == nil {
+		return nil, nil
+	}
+	state.remaining--
+
+	switch node.Kind {
+	case yaml.AliasNode:
+		if node.Alias == nil || state.seenAliases[node.Alias] {
+			return nil, errExampleLimit
+		}
+		state.seenAliases[node.Alias] = true
+		pairs, err := collectMergePairs(node.Alias, state, depth+1)
+		delete(state.seenAliases, node.Alias)
+		return pairs, err
+	case yaml.SequenceNode:
+		var pairs []examplePair
+		for _, child := range node.Content {
+			childPairs, err := collectMergePairs(child, state, depth+1)
+			if err != nil {
+				return nil, err
+			}
+			pairs = append(pairs, childPairs...)
+		}
+		return pairs, nil
+	case yaml.MappingNode:
+		expanded, err := expandExampleMapping(node, state, depth+1)
+		if err != nil {
+			return nil, err
+		}
+		pairs := make([]examplePair, 0, len(expanded.Content)/2)
+		for i := 0; i+1 < len(expanded.Content); i += 2 {
+			pairs = append(pairs, examplePair{key: expanded.Content[i], value: expanded.Content[i+1]})
+		}
+		return pairs, nil
+	default:
+		return nil, nil
+	}
+}
+
+func exampleKeyID(key *yaml.Node) string {
+	return key.Tag + ":" + key.Value
+}
+
+func normalizeExampleScalar(node *yaml.Node) *yaml.Node {
+	switch node.Tag {
+	case "!!null":
+		return nullExampleNode()
+	case "!!bool":
+		if value, err := strconv.ParseBool(strings.ToLower(node.Value)); err == nil {
+			return utils.CreateYamlNode(value)
+		}
+	case "!!int":
+		value := strings.ReplaceAll(node.Value, "_", "")
+		if parsed, err := strconv.ParseInt(value, 0, 64); err == nil {
+			return utils.CreateYamlNode(parsed)
+		}
+		if parsed, err := strconv.ParseUint(value, 0, 64); err == nil {
+			return utils.CreateYamlNode(parsed)
+		}
+	case "!!float":
+		value := strings.ReplaceAll(node.Value, "_", "")
+		switch strings.ToLower(value) {
+		case ".nan", ".inf", "+.inf", "-.inf":
+			return utils.CreateStringNode(node.Value)
+		}
+		// Integers beyond int64/uint64 are tagged as floats but would lose
+		// precision as JSON numbers, so keep their original text.
+		if isIntegerLexeme(value) {
+			return utils.CreateStringNode(node.Value)
+		}
+		if parsed, err := strconv.ParseFloat(value, 64); err == nil {
+			return utils.CreateYamlNode(parsed)
+		}
+	case "!!timestamp":
+		return utils.CreateStringNode(node.Value)
+	case "!!binary":
+		var value string
+		if err := node.Decode(&value); err == nil {
+			return utils.CreateStringNode(value)
+		}
+	}
+	return &yaml.Node{Kind: yaml.ScalarNode, Tag: node.Tag, Value: node.Value}
+}
+
+func isIntegerLexeme(value string) bool {
+	value = strings.TrimPrefix(strings.TrimPrefix(value, "+"), "-")
+	if value == "" {
+		return false
+	}
+	for _, r := range value {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
+}
+
+func nullExampleNode() *yaml.Node {
+	return &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!null", Value: "null"}
 }

@@ -15,6 +15,7 @@
 package gnostic
 
 import (
+	"log/slog"
 	"math"
 	"strconv"
 
@@ -65,17 +66,32 @@ func toVariables(variables *goa3.ServerVariables) *orderedmap.Map[string, *v3.Se
 	return vars
 }
 
-func toSecurityRequirements(securityReq []*goa3.SecurityRequirement) []*base.SecurityRequirement {
+func toSecurityRequirements(opts options.Options, securityReq []*goa3.SecurityRequirement) []*base.SecurityRequirement {
 	result := make([]*base.SecurityRequirement, len(securityReq))
 	for i, req := range securityReq {
 		reqs := orderedmap.New[string, []string]()
 		for _, prop := range req.AdditionalProperties {
-			reqs.Set(prop.Name, prop.Value.Value)
+			if prop == nil {
+				continue
+			}
+			// A requirement entry needs a scheme name.
+			if prop.Name == "" {
+				if prop.Value != nil && len(prop.Value.Value) > 0 && opts.Logger != nil {
+					opts.Logger.Warn("security requirement entry has scopes but no scheme name",
+						slog.Int("requirement", i), slog.Any("scopes", prop.Value.Value))
+				}
+				continue
+			}
+			var scopes []string
+			if prop.Value != nil {
+				scopes = prop.Value.Value
+			}
+			reqs.Set(prop.Name, scopes)
 		}
 
 		result[i] = &base.SecurityRequirement{
 			Requirements:             reqs,
-			ContainsEmptyRequirement: len(req.AdditionalProperties) == 0,
+			ContainsEmptyRequirement: reqs.Len() == 0,
 		}
 	}
 	return result
@@ -579,7 +595,7 @@ func toOperation(opts options.Options, op *goa3.Operation) *v3.Operation {
 		Responses:    toResponses(opts, op.GetResponses()),
 		Callbacks:    toCallbacks(opts, op.Callbacks),
 		Deprecated:   &op.Deprecated,
-		Security:     toSecurityRequirements(op.Security),
+		Security:     toSecurityRequirements(opts, op.Security),
 		Servers:      toServers(op.Servers),
 		Extensions:   toExtensions(op.SpecificationExtension),
 	}

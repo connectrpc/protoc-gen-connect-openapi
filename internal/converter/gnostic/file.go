@@ -62,7 +62,7 @@ func SpecWithFileAnnotations(opts options.Options, spec *highv3.Document, fd pro
 		}
 	}
 	spec.Servers = append(spec.Servers, toServers(gnosticDocument.Servers)...)
-	spec.Security = append(spec.Security, toSecurityRequirements(gnosticDocument.Security)...)
+	spec.Security = append(spec.Security, toSecurityRequirements(opts, gnosticDocument.Security)...)
 	spec.Tags = append(spec.Tags, toTags(gnosticDocument.Tags)...)
 	if exDocs := toExternalDocs(gnosticDocument.ExternalDocs); exDocs != nil {
 		spec.ExternalDocs = exDocs

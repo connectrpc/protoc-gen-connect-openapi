@@ -15,8 +15,11 @@
 package gnostic
 
 import (
+	"bytes"
+	"log/slog"
 	"testing"
 
+	"connectrpc.com/protoc-gen-connect-openapi/internal/converter/options"
 	goa3 "github.com/google/gnostic/openapiv3"
 	"github.com/pb33f/go-yaml"
 	"github.com/stretchr/testify/assert"
@@ -40,6 +43,64 @@ func TestToLinks(t *testing.T) {
 	link, ok := links.Get("byRef")
 	require.True(t, ok)
 	assert.Equal(t, "#/components/links/Other", link.Reference)
+}
+
+func TestToSecurityRequirements(t *testing.T) {
+	t.Parallel()
+	requirements := toSecurityRequirements(options.NewOptions(), []*goa3.SecurityRequirement{
+		{
+			AdditionalProperties: []*goa3.NamedStringArray{
+				{Name: "BearerAuth"},
+			},
+		},
+		{
+			AdditionalProperties: []*goa3.NamedStringArray{
+				{Name: ""},
+			},
+		},
+		{},
+	})
+
+	require.Len(t, requirements, 3)
+
+	scopes, ok := requirements[0].Requirements.Get("BearerAuth")
+	require.True(t, ok)
+	assert.Empty(t, scopes)
+	assert.False(t, requirements[0].ContainsEmptyRequirement)
+
+	out, err := yaml.Marshal(requirements[0])
+	require.NoError(t, err)
+	assert.Equal(t, "BearerAuth: []\n", string(out))
+
+	assert.Equal(t, 0, requirements[1].Requirements.Len())
+	assert.True(t, requirements[1].ContainsEmptyRequirement)
+
+	out, err = yaml.Marshal(requirements[1])
+	require.NoError(t, err)
+	assert.Equal(t, "{}\n", string(out))
+
+	assert.Equal(t, 0, requirements[2].Requirements.Len())
+	assert.True(t, requirements[2].ContainsEmptyRequirement)
+}
+
+func TestToSecurityRequirementsWarnsOnScopedEntryWithoutName(t *testing.T) {
+	t.Parallel()
+	var logs bytes.Buffer
+	opts := options.NewOptions()
+	opts.Logger = slog.New(slog.NewTextHandler(&logs, nil))
+
+	requirements := toSecurityRequirements(opts, []*goa3.SecurityRequirement{
+		{
+			AdditionalProperties: []*goa3.NamedStringArray{
+				{Name: "", Value: &goa3.StringArray{Value: []string{"admin"}}},
+			},
+		},
+	})
+
+	require.Len(t, requirements, 1)
+	assert.Equal(t, 0, requirements[0].Requirements.Len())
+	assert.True(t, requirements[0].ContainsEmptyRequirement)
+	assert.Contains(t, logs.String(), "has scopes but no scheme name")
 }
 
 func TestToDefault(t *testing.T) {

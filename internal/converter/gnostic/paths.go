@@ -75,7 +75,7 @@ func PathItemWithMethodAnnotations(opts options.Options, item *v3.PathItem, md p
 		}
 
 		if gnosticOperation.Security != nil {
-			oper.Security = toSecurityRequirements(gnosticOperation.Security)
+			oper.Security = toSecurityRequirements(opts, gnosticOperation.Security)
 		}
 		oper.Servers = toServers(gnosticOperation.Servers)
 
