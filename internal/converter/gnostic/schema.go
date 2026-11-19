@@ -18,6 +18,7 @@ import (
 	"errors"
 	"log/slog"
 	"slices"
+	"strconv"
 	"strings"
 
 	"connectrpc.com/protoc-gen-connect-openapi/internal/converter/options"
@@ -326,18 +327,62 @@ func expandExampleNode(node *yaml.Node, state *exampleExpandState, depth int) (*
 		}
 		return expanded, nil
 	default:
-		if node.Tag == "!!null" {
-			return nullExampleNode(), nil
-		}
-		// JSON can't represent non-finite floats, so keep them as strings.
-		if node.Tag == "!!float" {
-			switch strings.ToLower(node.Value) {
-			case ".nan", ".inf", "+.inf", "-.inf":
-				return utils.CreateStringNode(node.Value), nil
-			}
-		}
-		return &yaml.Node{Kind: yaml.ScalarNode, Tag: node.Tag, Value: node.Value}, nil
+		return normalizeExampleScalar(node), nil
 	}
+}
+
+func normalizeExampleScalar(node *yaml.Node) *yaml.Node {
+	switch node.Tag {
+	case "!!null":
+		return nullExampleNode()
+	case "!!bool":
+		if value, err := strconv.ParseBool(strings.ToLower(node.Value)); err == nil {
+			return utils.CreateYamlNode(value)
+		}
+	case "!!int":
+		value := strings.ReplaceAll(node.Value, "_", "")
+		if parsed, err := strconv.ParseInt(value, 0, 64); err == nil {
+			return utils.CreateYamlNode(parsed)
+		}
+		if parsed, err := strconv.ParseUint(value, 0, 64); err == nil {
+			return utils.CreateYamlNode(parsed)
+		}
+	case "!!float":
+		value := strings.ReplaceAll(node.Value, "_", "")
+		switch strings.ToLower(value) {
+		case ".nan", ".inf", "+.inf", "-.inf":
+			return utils.CreateStringNode(node.Value)
+		}
+		// Integers beyond int64/uint64 are tagged as floats but would lose
+		// precision as JSON numbers, so keep their original text.
+		if isIntegerLexeme(value) {
+			return utils.CreateStringNode(node.Value)
+		}
+		if parsed, err := strconv.ParseFloat(value, 64); err == nil {
+			return utils.CreateYamlNode(parsed)
+		}
+	case "!!timestamp":
+		return utils.CreateStringNode(node.Value)
+	case "!!binary":
+		var value string
+		if err := node.Decode(&value); err == nil {
+			return utils.CreateStringNode(value)
+		}
+	}
+	return &yaml.Node{Kind: yaml.ScalarNode, Tag: node.Tag, Value: node.Value}
+}
+
+func isIntegerLexeme(value string) bool {
+	value = strings.TrimPrefix(strings.TrimPrefix(value, "+"), "-")
+	if value == "" {
+		return false
+	}
+	for _, r := range value {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func nullExampleNode() *yaml.Node {

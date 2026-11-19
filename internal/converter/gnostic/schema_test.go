@@ -16,6 +16,7 @@ package gnostic
 
 import (
 	"bytes"
+	"encoding/json"
 	"log/slog"
 	"testing"
 
@@ -41,14 +42,19 @@ func TestExpandExampleEntry(t *testing.T) {
 		{name: "multiple non-string keys", value: "{2: two, 1: one}", want: "2: two\n1: one\n"},
 		{name: "boolean", value: "true", want: "true\n"},
 		{name: "integer", value: "42", want: "42\n"},
+		{name: "hex integer", value: "0x1F", want: "31\n"},
+		{name: "octal integer", value: "0o17", want: "15\n"},
+		{name: "binary integer", value: "0b101", want: "5\n"},
+		{name: "underscore integer", value: "1_000", want: "1000\n"},
 		{name: "float", value: "1.5", want: "1.5\n"},
+		{name: "underscore float", value: "1_000.5", want: "1000.5\n"},
 		{name: "string", value: "Example value", want: "Example value\n"},
 		{name: "quoted numeric string", value: "'123'", want: "\"123\"\n"},
 		{name: "quoted timestamp string", value: "'2024-01-01'", want: "\"2024-01-01\"\n"},
 		{name: "quoted boolean string", value: "'true'", want: "\"true\"\n"},
-		{name: "timestamp", value: "2024-01-01", want: "2024-01-01\n"},
-		{name: "binary", value: "!!binary aGVsbG8=", want: "!!binary aGVsbG8=\n"},
-		{name: "large integer", value: "123456789012345678901234567890", want: "123456789012345678901234567890\n"},
+		{name: "timestamp", value: "2024-01-01", want: "\"2024-01-01\"\n"},
+		{name: "binary", value: "!!binary aGVsbG8=", want: "hello\n"},
+		{name: "large integer", value: "123456789012345678901234567890", want: "\"123456789012345678901234567890\"\n"},
 		{name: "nan", value: ".nan", want: "\".nan\"\n"},
 		{name: "infinity", value: ".inf", want: "\".inf\"\n"},
 		{name: "negative infinity", value: "-.inf", want: "\"-.inf\"\n"},
@@ -61,6 +67,37 @@ func TestExpandExampleEntry(t *testing.T) {
 			expanded, err := expandExampleEntry(&node)
 			require.NoError(t, err)
 			out, err := yaml.Marshal(expanded)
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, string(out))
+		})
+	}
+}
+
+func TestExpandExampleEntryJSONMatchesYAML(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name  string
+		value string
+		want  string
+	}{
+		{name: "timestamp", value: "2024-01-01", want: `"2024-01-01"`},
+		{name: "binary", value: "!!binary aGVsbG8=", want: `"hello"`},
+		{name: "hex integer", value: "0x1F", want: `31`},
+		{name: "underscore integer", value: "1_000", want: `1000`},
+		{name: "underscore float", value: "1_000.5", want: `1000.5`},
+		{name: "boolean", value: "true", want: `true`},
+		{name: "large integer", value: "123456789012345678901234567890", want: `"123456789012345678901234567890"`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var node yaml.Node
+			require.NoError(t, yaml.Unmarshal([]byte(tc.value), &node))
+			expanded, err := expandExampleEntry(&node)
+			require.NoError(t, err)
+
+			var decoded any
+			require.NoError(t, expanded.Decode(&decoded))
+			out, err := json.Marshal(decoded)
 			require.NoError(t, err)
 			assert.Equal(t, tc.want, string(out))
 		})
