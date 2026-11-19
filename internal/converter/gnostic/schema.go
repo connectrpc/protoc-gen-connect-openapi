@@ -15,6 +15,7 @@
 package gnostic
 
 import (
+	"errors"
 	"log/slog"
 	"slices"
 	"strings"
@@ -90,8 +91,10 @@ func schemaWithAnnotations(opts options.Options, schema *base.Schema, gnosticSch
 			var node yaml.Node
 			if err := yaml.Unmarshal([]byte(yamlText), &node); err != nil {
 				opts.Logger.Warn("unable to unmarshal example", slog.Any("error", err))
+			} else if expanded, err := expandExampleEntry(&node); err != nil {
+				opts.Logger.Warn("unable to expand example", slog.Any("error", err))
 			} else {
-				schema.Examples = append(schema.Examples, expandExampleEntry(&node))
+				schema.Examples = append(schema.Examples, expanded)
 			}
 		}
 		// If the example is defined with google.protobuf.Any
@@ -252,43 +255,88 @@ func schemaWithAnnotations(opts options.Options, schema *base.Schema, gnosticSch
 	return schema
 }
 
-func expandExampleEntry(node *yaml.Node) *yaml.Node {
-	if node == nil {
-		return nullExampleNode()
+const (
+	maxExampleDepth = 100
+	maxExampleNodes = 10_000
+)
+
+var errExampleLimit = errors.New("example contains a recursive alias or exceeds expansion limits")
+
+type exampleExpandState struct {
+	seenAliases map[*yaml.Node]bool
+	remaining   int
+}
+
+func expandExampleEntry(node *yaml.Node) (*yaml.Node, error) {
+	state := &exampleExpandState{
+		seenAliases: make(map[*yaml.Node]bool),
+		remaining:   maxExampleNodes,
 	}
+	return expandExampleNode(node, state, 0)
+}
+
+func expandExampleNode(node *yaml.Node, state *exampleExpandState, depth int) (*yaml.Node, error) {
+	if depth > maxExampleDepth || state.remaining <= 0 {
+		return nil, errExampleLimit
+	}
+	if node == nil {
+		return nullExampleNode(), nil
+	}
+	state.remaining--
 
 	switch node.Kind {
 	case yaml.DocumentNode:
 		if len(node.Content) == 1 {
-			return expandExampleEntry(node.Content[0])
+			return expandExampleNode(node.Content[0], state, depth+1)
 		}
-		return nullExampleNode()
+		return nullExampleNode(), nil
 	case yaml.MappingNode:
 		out := utils.CreateEmptyMapNode()
 		for i := 0; i+1 < len(node.Content); i += 2 {
-			out.Content = append(out.Content, expandExampleEntry(node.Content[i]), expandExampleEntry(node.Content[i+1]))
+			key, err := expandExampleNode(node.Content[i], state, depth+1)
+			if err != nil {
+				return nil, err
+			}
+			value, err := expandExampleNode(node.Content[i+1], state, depth+1)
+			if err != nil {
+				return nil, err
+			}
+			out.Content = append(out.Content, key, value)
 		}
-		return out
+		return out, nil
 	case yaml.SequenceNode:
 		out := utils.CreateEmptySequenceNode()
 		for _, child := range node.Content {
-			out.Content = append(out.Content, expandExampleEntry(child))
+			expanded, err := expandExampleNode(child, state, depth+1)
+			if err != nil {
+				return nil, err
+			}
+			out.Content = append(out.Content, expanded)
 		}
-		return out
+		return out, nil
 	case yaml.AliasNode:
-		return expandExampleEntry(node.Alias)
+		if node.Alias == nil || state.seenAliases[node.Alias] {
+			return nil, errExampleLimit
+		}
+		state.seenAliases[node.Alias] = true
+		expanded, err := expandExampleNode(node.Alias, state, depth+1)
+		delete(state.seenAliases, node.Alias)
+		if err != nil {
+			return nil, err
+		}
+		return expanded, nil
 	default:
 		if node.Tag == "!!null" {
-			return nullExampleNode()
+			return nullExampleNode(), nil
 		}
 		// JSON can't represent non-finite floats, so keep them as strings.
 		if node.Tag == "!!float" {
 			switch strings.ToLower(node.Value) {
 			case ".nan", ".inf", "+.inf", "-.inf":
-				return utils.CreateStringNode(node.Value)
+				return utils.CreateStringNode(node.Value), nil
 			}
 		}
-		return &yaml.Node{Kind: yaml.ScalarNode, Tag: node.Tag, Value: node.Value}
+		return &yaml.Node{Kind: yaml.ScalarNode, Tag: node.Tag, Value: node.Value}, nil
 	}
 }
 

@@ -15,6 +15,8 @@
 package gnostic
 
 import (
+	"bytes"
+	"log/slog"
 	"testing"
 
 	"connectrpc.com/protoc-gen-connect-openapi/internal/converter/options"
@@ -56,11 +58,68 @@ func TestExpandExampleEntry(t *testing.T) {
 			t.Parallel()
 			var node yaml.Node
 			require.NoError(t, yaml.Unmarshal([]byte(tc.value), &node))
-			out, err := yaml.Marshal(expandExampleEntry(&node))
+			expanded, err := expandExampleEntry(&node)
+			require.NoError(t, err)
+			out, err := yaml.Marshal(expanded)
 			require.NoError(t, err)
 			assert.Equal(t, tc.want, string(out))
 		})
 	}
+}
+
+func TestExpandExampleEntryRejectsRecursiveAlias(t *testing.T) {
+	t.Parallel()
+	var node yaml.Node
+	require.NoError(t, yaml.Unmarshal([]byte("&a [*a]"), &node))
+
+	_, err := expandExampleEntry(&node)
+	require.ErrorIs(t, err, errExampleLimit)
+}
+
+func TestExpandExampleEntryRejectsExcessiveAliasing(t *testing.T) {
+	t.Parallel()
+	const payload = `
+a: &a ["lol","lol","lol","lol","lol","lol","lol","lol","lol"]
+b: &b [*a,*a,*a,*a,*a,*a,*a,*a,*a]
+c: &c [*b,*b,*b,*b,*b,*b,*b,*b,*b]
+d: &d [*c,*c,*c,*c,*c,*c,*c,*c,*c]
+e: &e [*d,*d,*d,*d,*d,*d,*d,*d,*d]
+f: &f [*e,*e,*e,*e,*e,*e,*e,*e,*e]
+g: &g [*f,*f,*f,*f,*f,*f,*f,*f,*f]
+h: &h [*g,*g,*g,*g,*g,*g,*g,*g,*g]
+i: &i [*h,*h,*h,*h,*h,*h,*h,*h,*h]
+`
+	var node yaml.Node
+	require.NoError(t, yaml.Unmarshal([]byte(payload), &node))
+
+	_, err := expandExampleEntry(&node)
+	require.ErrorIs(t, err, errExampleLimit)
+}
+
+func TestExpandExampleEntryAllowsRepeatedAlias(t *testing.T) {
+	t.Parallel()
+	var node yaml.Node
+	require.NoError(t, yaml.Unmarshal([]byte("{a: &x 1, b: *x, c: *x}"), &node))
+
+	expanded, err := expandExampleEntry(&node)
+	require.NoError(t, err)
+	out, err := yaml.Marshal(expanded)
+	require.NoError(t, err)
+	assert.Equal(t, "a: 1\nb: 1\nc: 1\n", string(out))
+}
+
+func TestSchemaWithAnnotationsSkipsRecursiveExample(t *testing.T) {
+	t.Parallel()
+	var logs bytes.Buffer
+	opts := options.NewOptions()
+	opts.Logger = slog.New(slog.NewTextHandler(&logs, nil))
+
+	schema := schemaWithAnnotations(opts, &base.Schema{}, &goa3.Schema{
+		Example: &goa3.Any{Yaml: "&a [*a]"},
+	})
+
+	assert.Empty(t, schema.Examples)
+	assert.Contains(t, logs.String(), "unable to expand example")
 }
 
 func TestSchemaWithAnnotationsExampleTypes(t *testing.T) {
