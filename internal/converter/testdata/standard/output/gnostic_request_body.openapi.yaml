@@ -1,0 +1,363 @@
+openapi: 3.1.0
+info:
+  title: standard
+  description: |-
+    ## standard.GnosticRequestBodyService
+
+    A gnostic request_body replaces the generated body, with two exceptions: a
+     media type without a schema uses the generated schema, and a body without
+     content keeps the generated content.
+  version: 1.0.0
+paths:
+  /standard.GnosticRequestBodyService/CreateBodyItem:
+    post:
+      tags:
+        - standard.GnosticRequestBodyService
+      summary: CreateBodyItem
+      description: The media type only sets an example, so it keeps the generated schema.
+      operationId: standard.GnosticRequestBodyService.CreateBodyItem
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          description: Define the version of the Connect protocol
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+          example: 1
+        - name: Connect-Timeout-Ms
+          in: header
+          description: Define the timeout, in ms
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+          example: 1000
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/standard.CreateBodyItemRequest'
+            example: {name: item-1}
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/standard.BodyItem'
+  /standard.GnosticRequestBodyService/DescribeBodyItem:
+    post:
+      tags:
+        - standard.GnosticRequestBodyService
+      summary: DescribeBodyItem
+      description: Without content, the annotation describes the generated body.
+      operationId: standard.GnosticRequestBodyService.DescribeBodyItem
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          description: Define the version of the Connect protocol
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+          example: 1
+        - name: Connect-Timeout-Ms
+          in: header
+          description: Define the timeout, in ms
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+          example: 1000
+      requestBody:
+        description: The item to describe.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/standard.DescribeBodyItemRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/standard.BodyItem'
+  /standard.GnosticRequestBodyService/ImportBodyItems:
+    post:
+      tags:
+        - standard.GnosticRequestBodyService
+      summary: ImportBodyItems
+      description: A media type with its own schema replaces the generated body entirely.
+      operationId: standard.GnosticRequestBodyService.ImportBodyItems
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          description: Define the version of the Connect protocol
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+          example: 1
+        - name: Connect-Timeout-Ms
+          in: header
+          description: Define the timeout, in ms
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+          example: 1000
+      requestBody:
+        content:
+          text/csv:
+            schema:
+              type: string
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/standard.BodyItem'
+  /v1/items/{id}:
+    put:
+      tags:
+        - standard.GnosticRequestBodyService
+      summary: ReplaceBodyItem
+      description: The same applies to a body generated from an HTTP rule.
+      operationId: standard.GnosticRequestBodyService.ReplaceBodyItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  title: name
+              title: ReplaceBodyItemRequest
+              additionalProperties: false
+            example: {name: item-1}
+        required: true
+      responses:
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/google.rpc.Status'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/standard.BodyItem'
+    patch:
+      tags:
+        - standard.GnosticRequestBodyService
+      summary: PatchBodyItem
+      description: |-
+        A body field isn't required by default; the annotation makes it so and
+         keeps the generated content and description.
+      operationId: standard.GnosticRequestBodyService.PatchBodyItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: id
+      requestBody:
+        description: The fields to change.
+        content:
+          application/json:
+            schema:
+              title: item
+              description: The fields to change.
+              $ref: '#/components/schemas/standard.BodyItem'
+        required: true
+      responses:
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/google.rpc.Status'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/standard.BodyItem'
+components:
+  schemas:
+    connect-protocol-version:
+      type: number
+      examples:
+        - 1
+      title: Connect-Protocol-Version
+      description: Define the version of the Connect protocol
+      const: 1
+    connect-timeout-header:
+      type: number
+      examples:
+        - 1000
+      title: Connect-Timeout-Ms
+      description: Define the timeout, in ms
+    connect.error:
+      type: object
+      properties:
+        code:
+          type: string
+          examples:
+            - not_found
+          enum:
+            - canceled
+            - unknown
+            - invalid_argument
+            - deadline_exceeded
+            - not_found
+            - already_exists
+            - permission_denied
+            - resource_exhausted
+            - failed_precondition
+            - aborted
+            - out_of_range
+            - unimplemented
+            - internal
+            - unavailable
+            - data_loss
+            - unauthenticated
+          description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+        message:
+          type: string
+          description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/connect.error_details.Any'
+          description: A list of messages that carry the error details. There is no limit on the number of messages.
+      title: Connect Error
+      additionalProperties: true
+      description: 'Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation'
+    connect.error_details.Any:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'A URL that acts as a globally unique identifier for the type of the serialized message. For example: `type.googleapis.com/google.rpc.ErrorInfo`.'
+        value:
+          type: string
+          format: byte
+          description: The Protobuf message, serialized as bytes and base64-encoded. The specific message type is identified by the `type` field.
+        debug:
+          type: object
+          title: Debug
+          additionalProperties: true
+          description: Deserialized error detail payload. The 'type' field indicates the schema. This field is for easier debugging and should not be relied upon for application logic.
+      additionalProperties: true
+      description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message, with an additional debug field for ConnectRPC error details.
+    google.protobuf.Any:
+      type: object
+      properties:
+        '@type':
+          type: string
+          description: A URL/resource name that uniquely identifies the type of the serialized message.
+      additionalProperties: true
+      description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+    google.rpc.Status:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: The status code, which should be an enum value of google.rpc.Code.
+        message:
+          type: string
+          description: A developer-facing error message.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/google.protobuf.Any'
+          description: A list of messages that carry the error details.
+      description: The Status type defines a logical error model suitable for gRPC and REST APIs.
+    standard.BodyItem:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        name:
+          type: string
+          title: name
+      title: BodyItem
+      additionalProperties: false
+    standard.CreateBodyItemRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          title: name
+      title: CreateBodyItemRequest
+      additionalProperties: false
+    standard.DescribeBodyItemRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          title: name
+      title: DescribeBodyItemRequest
+      additionalProperties: false
+    standard.ImportBodyItemsRequest:
+      type: object
+      properties:
+        csv:
+          type: string
+          title: csv
+      title: ImportBodyItemsRequest
+      additionalProperties: false
+    standard.PatchBodyItemRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        item:
+          title: item
+          description: The fields to change.
+          $ref: '#/components/schemas/standard.BodyItem'
+      title: PatchBodyItemRequest
+      additionalProperties: false
+    standard.ReplaceBodyItemRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        name:
+          type: string
+          title: name
+      title: ReplaceBodyItemRequest
+      additionalProperties: false
+security: []
+tags:
+  - name: standard.GnosticRequestBodyService
+    description: |-
+      A gnostic request_body replaces the generated body, with two exceptions: a
+       media type without a schema uses the generated schema, and a body without
+       content keeps the generated content.

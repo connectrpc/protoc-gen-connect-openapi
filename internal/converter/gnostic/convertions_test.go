@@ -103,6 +103,21 @@ func TestToSecurityRequirementsWarnsOnScopedEntryWithoutName(t *testing.T) {
 	assert.Contains(t, logs.String(), "has scopes but no scheme name")
 }
 
+func TestToMediaTypesWithoutValue(t *testing.T) {
+	t.Parallel()
+	mediaTypes := toMediaTypes(options.NewOptions(), &goa3.MediaTypes{
+		AdditionalProperties: []*goa3.NamedMediaType{
+			{Name: "application/json"},
+		},
+	})
+
+	require.Equal(t, 1, mediaTypes.Len())
+	mediaType, ok := mediaTypes.Get("application/json")
+	require.True(t, ok)
+	assert.Nil(t, mediaType.Schema)
+	assert.Nil(t, mediaType.Example)
+}
+
 func TestToDefault(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {

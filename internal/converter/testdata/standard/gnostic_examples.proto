@@ -1,0 +1,57 @@
+// Copyright 2023-2026 The Connect Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package standard;
+
+import "gnostic/openapi/v3/annotations.proto";
+
+// Gnostic examples are YAML, so they can be mappings and sequences, reuse
+// values through anchors and merge keys, and carry typed scalars. The YAML
+// and JSON outputs render the same values.
+service GnosticExamplesService {
+  rpc GetShipment(GetShipmentRequest) returns (Shipment);
+}
+
+message GetShipmentRequest {
+  // A scalar keeps its YAML type and is written in its canonical form.
+  int32 id = 1 [(gnostic.openapi.v3.property) = {
+    example: {yaml: "0x1F"}
+  }];
+}
+
+message Shipment {
+  // The destination merges the origin and overrides its city. The unquoted
+  // date stays a string instead of becoming a timestamp.
+  option (gnostic.openapi.v3.schema) = {
+    example: {yaml: "{id: 0x1F, shippedOn: 2024-01-01, fragile: true, weightKg: 1_250.5, origin: &home {city: Lisbon, country: PT}, destination: {<<: *home, city: Porto}, stops: [*home]}"}
+  };
+
+  int32 id = 1;
+  string shipped_on = 2;
+  bool fragile = 3;
+  double weight_kg = 4;
+  ShipmentAddress origin = 5;
+  ShipmentAddress destination = 6;
+  repeated ShipmentAddress stops = 7;
+}
+
+message ShipmentAddress {
+  string city = 1;
+  // An example that isn't valid YAML data, here a duplicate key, is left out.
+  string country = 2 [(gnostic.openapi.v3.property) = {
+    example: {yaml: "{code: PT, code: ES}"}
+  }];
+}

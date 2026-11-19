@@ -48,7 +48,7 @@ func PathItemWithMethodAnnotations(opts options.Options, item *v3.PathItem, md p
 		// GET and HEAD carry no body; for allow-get the request goes in the
 		// query string, so a request body only belongs on the other methods.
 		if gnosticOperation.RequestBody != nil && method != "get" && method != "head" {
-			oper.RequestBody = toRequestBody(opts, gnosticOperation.RequestBody)
+			oper.RequestBody = mergeRequestBody(oper.RequestBody, toRequestBody(opts, gnosticOperation.RequestBody))
 		}
 
 		if gnosticOperation.Responses != nil {
@@ -107,4 +107,43 @@ func PathItemWithMethodAnnotations(opts options.Options, item *v3.PathItem, md p
 		}
 	}
 	return item
+}
+
+// mergeRequestBody applies a gnostic request body to the generated one. The
+// annotation replaces the generated body, with two exceptions: a media type
+// without a schema uses the generated schema for that media type, and a body
+// without content keeps the generated content.
+func mergeRequestBody(generated, annotated *v3.RequestBody) *v3.RequestBody {
+	// A missing or referenced body has nothing to fill in.
+	if generated == nil || annotated == nil || annotated.Reference != "" {
+		return annotated
+	}
+	if annotated.Content == nil || annotated.Content.Len() == 0 {
+		merged := *generated
+		if annotated.Description != "" {
+			merged.Description = annotated.Description
+		}
+		// A proto3 bool can't tell false from unset, so the annotation can
+		// only make the body required here, not optional.
+		if annotated.Required != nil {
+			merged.Required = annotated.Required
+		}
+		if annotated.Extensions != nil {
+			merged.Extensions = annotated.Extensions
+		}
+		return &merged
+	}
+	if generated.Content == nil {
+		return annotated
+	}
+	for pair := annotated.Content.First(); pair != nil; pair = pair.Next() {
+		mediaType := pair.Value()
+		if mediaType.Schema != nil {
+			continue
+		}
+		if generatedMediaType, ok := generated.Content.Get(pair.Key()); ok {
+			mediaType.Schema = generatedMediaType.Schema
+		}
+	}
+	return annotated
 }

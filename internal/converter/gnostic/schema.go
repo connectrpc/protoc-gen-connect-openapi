@@ -261,7 +261,10 @@ const (
 	maxExampleNodes = 10_000
 )
 
-var errExampleLimit = errors.New("example contains a recursive alias or exceeds expansion limits")
+var (
+	errExampleLimit = errors.New("example contains a recursive alias or exceeds expansion limits")
+	errExampleMerge = errors.New("example merge key requires a map or a sequence of maps")
+)
 
 type exampleExpandState struct {
 	seenAliases map[*yaml.Node]bool
@@ -273,7 +276,19 @@ func expandExampleEntry(node *yaml.Node) (*yaml.Node, error) {
 		seenAliases: make(map[*yaml.Node]bool),
 		remaining:   maxExampleNodes,
 	}
-	return expandExampleNode(node, state, 0)
+	expanded, err := expandExampleNode(node, state, 0)
+	if err != nil {
+		return nil, err
+	}
+	// Decode the result to reject what the walk doesn't check: duplicate keys
+	// and scalars that don't match their tag. Those produce invalid YAML or
+	// fail JSON rendering. The expanded tree is bounded and has no aliases,
+	// so decoding it is bounded too.
+	var decoded any
+	if err := expanded.Decode(&decoded); err != nil {
+		return nil, err
+	}
+	return expanded, nil
 }
 
 func expandExampleNode(node *yaml.Node, state *exampleExpandState, depth int) (*yaml.Node, error) {
@@ -403,7 +418,7 @@ func collectMergePairs(node *yaml.Node, state *exampleExpandState, depth int) ([
 		}
 		return pairs, nil
 	default:
-		return nil, nil
+		return nil, errExampleMerge
 	}
 }
 

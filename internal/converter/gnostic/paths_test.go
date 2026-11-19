@@ -22,6 +22,7 @@ import (
 	"github.com/pb33f/go-yaml"
 	"github.com/pb33f/libopenapi/datamodel/high/base"
 	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
+	"github.com/pb33f/libopenapi/orderedmap"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
@@ -266,6 +267,109 @@ func TestPathItemWithMethodAnnotations_ParameterMerging(t *testing.T) {
 		assert.Equal(t, "Original page description", pageParam.Description, "should preserve original description")
 		// The schema should have been merged with format from gnostic annotation
 		assert.Equal(t, "int32", pageParam.Schema.Schema().Format)
+	})
+}
+
+func TestMergeRequestBody(t *testing.T) {
+	t.Parallel()
+	generatedSchema := base.CreateSchemaProxyRef("#/components/schemas/Generated")
+	annotatedSchema := base.CreateSchemaProxyRef("#/components/schemas/Annotated")
+	newGenerated := func() *v3.RequestBody {
+		content := orderedmap.New[string, *v3.MediaType]()
+		content.Set("application/json", &v3.MediaType{Schema: generatedSchema})
+		content.Set("application/proto", &v3.MediaType{Schema: generatedSchema})
+		required := true
+		return &v3.RequestBody{Description: "Generated", Content: content, Required: &required}
+	}
+	newAnnotated := func(mediaTypes map[string]*v3.MediaType) *v3.RequestBody {
+		content := orderedmap.New[string, *v3.MediaType]()
+		for name, mediaType := range mediaTypes {
+			content.Set(name, mediaType)
+		}
+		return &v3.RequestBody{Content: content}
+	}
+
+	t.Run("media type without a schema keeps the generated schema", func(t *testing.T) {
+		t.Parallel()
+		example := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "example"}
+		merged := mergeRequestBody(newGenerated(), newAnnotated(map[string]*v3.MediaType{
+			"application/json": {Example: example},
+		}))
+
+		// The annotation still decides everything else about the body.
+		require.Equal(t, 1, merged.Content.Len())
+		assert.Empty(t, merged.Description)
+		assert.Nil(t, merged.Required)
+		mediaType, ok := merged.Content.Get("application/json")
+		require.True(t, ok)
+		assert.Same(t, generatedSchema, mediaType.Schema)
+		assert.Same(t, example, mediaType.Example)
+	})
+
+	t.Run("media type with a schema keeps its own", func(t *testing.T) {
+		t.Parallel()
+		merged := mergeRequestBody(newGenerated(), newAnnotated(map[string]*v3.MediaType{
+			"application/json": {Schema: annotatedSchema},
+		}))
+
+		mediaType, ok := merged.Content.Get("application/json")
+		require.True(t, ok)
+		assert.Same(t, annotatedSchema, mediaType.Schema)
+	})
+
+	t.Run("media type that wasn't generated has no schema to keep", func(t *testing.T) {
+		t.Parallel()
+		merged := mergeRequestBody(newGenerated(), newAnnotated(map[string]*v3.MediaType{
+			"text/csv": {},
+		}))
+
+		require.Equal(t, 1, merged.Content.Len())
+		mediaType, ok := merged.Content.Get("text/csv")
+		require.True(t, ok)
+		assert.Nil(t, mediaType.Schema)
+	})
+
+	t.Run("body without content keeps the generated content", func(t *testing.T) {
+		t.Parallel()
+		generated := newGenerated()
+		merged := mergeRequestBody(generated, &v3.RequestBody{Description: "Annotated"})
+
+		assert.Equal(t, "Annotated", merged.Description)
+		assert.Same(t, generated.Content, merged.Content)
+		require.NotNil(t, merged.Required)
+		assert.True(t, *merged.Required)
+		// The generated body is left alone.
+		assert.Equal(t, "Generated", generated.Description)
+	})
+
+	t.Run("body without content can make the generated body required", func(t *testing.T) {
+		t.Parallel()
+		generated := newGenerated()
+		generated.Required = nil
+		required := true
+		merged := mergeRequestBody(generated, &v3.RequestBody{Required: &required})
+
+		assert.Equal(t, "Generated", merged.Description)
+		assert.Same(t, generated.Content, merged.Content)
+		require.NotNil(t, merged.Required)
+		assert.True(t, *merged.Required)
+	})
+
+	t.Run("referenced body replaces the generated body", func(t *testing.T) {
+		t.Parallel()
+		annotated := v3.CreateRequestBodyRef("#/components/requestBodies/Annotated")
+		assert.Same(t, annotated, mergeRequestBody(newGenerated(), annotated))
+	})
+
+	t.Run("without a generated body the annotation is used as is", func(t *testing.T) {
+		t.Parallel()
+		annotated := &v3.RequestBody{Description: "Annotated"}
+		assert.Same(t, annotated, mergeRequestBody(nil, annotated))
+	})
+
+	t.Run("empty annotation removes the generated body", func(t *testing.T) {
+		t.Parallel()
+		assert.Nil(t, mergeRequestBody(newGenerated(), nil))
 	})
 }
 
