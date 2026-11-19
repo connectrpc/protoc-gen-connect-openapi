@@ -15,7 +15,6 @@
 package gnostic
 
 import (
-	"cmp"
 	"log/slog"
 	"slices"
 	"strings"
@@ -265,21 +264,9 @@ func expandExampleEntry(node *yaml.Node) *yaml.Node {
 		}
 		return nullExampleNode()
 	case yaml.MappingNode:
-		type entry struct {
-			key   *yaml.Node
-			value *yaml.Node
-		}
-		entries := make([]entry, 0, len(node.Content)/2)
-		for i := 0; i+1 < len(node.Content); i += 2 {
-			entries = append(entries, entry{key: node.Content[i], value: node.Content[i+1]})
-		}
-		// Sort by tag and value so the output is deterministic.
-		slices.SortStableFunc(entries, func(a, b entry) int {
-			return cmp.Compare(a.key.Tag+":"+a.key.Value, b.key.Tag+":"+b.key.Value)
-		})
 		out := utils.CreateEmptyMapNode()
-		for _, e := range entries {
-			out.Content = append(out.Content, expandExampleEntry(e.key), expandExampleEntry(e.value))
+		for i := 0; i+1 < len(node.Content); i += 2 {
+			out.Content = append(out.Content, expandExampleEntry(node.Content[i]), expandExampleEntry(node.Content[i+1]))
 		}
 		return out
 	case yaml.SequenceNode:

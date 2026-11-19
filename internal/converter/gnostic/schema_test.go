@@ -36,7 +36,7 @@ func TestExpandExampleEntry(t *testing.T) {
 		{name: "nested object in sequence", value: "[{id: 1}, {id: 2}]", want: "- id: 1\n- id: 2\n"},
 		{name: "alias", value: "{a: &x 1, b: *x}", want: "a: 1\nb: 1\n"},
 		{name: "non-string key", value: "{1: one}", want: "1: one\n"},
-		{name: "multiple non-string keys", value: "{2: two, 1: one}", want: "1: one\n2: two\n"},
+		{name: "multiple non-string keys", value: "{2: two, 1: one}", want: "2: two\n1: one\n"},
 		{name: "boolean", value: "true", want: "true\n"},
 		{name: "integer", value: "42", want: "42\n"},
 		{name: "float", value: "1.5", want: "1.5\n"},

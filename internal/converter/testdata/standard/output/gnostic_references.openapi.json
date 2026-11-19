@@ -181,8 +181,7 @@
                 "$ref": "#/components/schemas/standard.GnosticNote"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "default": {

@@ -15,8 +15,11 @@
 package gnostic
 
 import (
+	"bytes"
+	"log/slog"
 	"testing"
 
+	"connectrpc.com/protoc-gen-connect-openapi/internal/converter/options"
 	goa3 "github.com/google/gnostic/openapiv3"
 	"github.com/pb33f/go-yaml"
 	"github.com/stretchr/testify/assert"
@@ -44,7 +47,7 @@ func TestToLinks(t *testing.T) {
 
 func TestToSecurityRequirements(t *testing.T) {
 	t.Parallel()
-	requirements := toSecurityRequirements([]*goa3.SecurityRequirement{
+	requirements := toSecurityRequirements(options.NewOptions(), []*goa3.SecurityRequirement{
 		{
 			AdditionalProperties: []*goa3.NamedStringArray{
 				{Name: "BearerAuth"},
@@ -78,6 +81,26 @@ func TestToSecurityRequirements(t *testing.T) {
 
 	assert.Equal(t, 0, requirements[2].Requirements.Len())
 	assert.True(t, requirements[2].ContainsEmptyRequirement)
+}
+
+func TestToSecurityRequirementsWarnsOnScopedEntryWithoutName(t *testing.T) {
+	t.Parallel()
+	var logs bytes.Buffer
+	opts := options.NewOptions()
+	opts.Logger = slog.New(slog.NewTextHandler(&logs, nil))
+
+	requirements := toSecurityRequirements(opts, []*goa3.SecurityRequirement{
+		{
+			AdditionalProperties: []*goa3.NamedStringArray{
+				{Name: "", Value: &goa3.StringArray{Value: []string{"admin"}}},
+			},
+		},
+	})
+
+	require.Len(t, requirements, 1)
+	assert.Equal(t, 0, requirements[0].Requirements.Len())
+	assert.True(t, requirements[0].ContainsEmptyRequirement)
+	assert.Contains(t, logs.String(), "has scopes but no scheme name")
 }
 
 func TestToDefault(t *testing.T) {

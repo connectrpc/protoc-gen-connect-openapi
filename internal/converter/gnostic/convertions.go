@@ -15,6 +15,7 @@
 package gnostic
 
 import (
+	"log/slog"
 	"math"
 	"strconv"
 
@@ -65,13 +66,20 @@ func toVariables(variables *goa3.ServerVariables) *orderedmap.Map[string, *v3.Se
 	return vars
 }
 
-func toSecurityRequirements(securityReq []*goa3.SecurityRequirement) []*base.SecurityRequirement {
+func toSecurityRequirements(opts options.Options, securityReq []*goa3.SecurityRequirement) []*base.SecurityRequirement {
 	result := make([]*base.SecurityRequirement, len(securityReq))
 	for i, req := range securityReq {
 		reqs := orderedmap.New[string, []string]()
 		for _, prop := range req.AdditionalProperties {
+			if prop == nil {
+				continue
+			}
 			// A requirement entry needs a scheme name.
-			if prop == nil || prop.Name == "" {
+			if prop.Name == "" {
+				if prop.Value != nil && len(prop.Value.Value) > 0 && opts.Logger != nil {
+					opts.Logger.Warn("security requirement entry has scopes but no scheme name",
+						slog.Any("scopes", prop.Value.Value))
+				}
 				continue
 			}
 			var scopes []string
@@ -143,98 +151,6 @@ func toRequestBody(opts options.Options, bodyOrRef *goa3.RequestBodyOrReference)
 		Required:    trueOrNil(rbody.Required),
 		Extensions:  toExtensions(rbody.SpecificationExtension),
 	}
-}
-
-// mergeRequestBody merges a gnostic request body into the generated one.
-// Fields the annotation doesn't set keep their generated values.
-func mergeRequestBody(existing, annotated *v3.RequestBody) *v3.RequestBody {
-	if annotated == nil {
-		return existing
-	}
-	// A referenced body can't be merged with an inline one.
-	if existing == nil || annotated.Reference != "" {
-		return annotated
-	}
-
-	merged := *annotated
-	if merged.Required == nil {
-		merged.Required = existing.Required
-	}
-	if merged.Description == "" {
-		merged.Description = existing.Description
-	}
-	merged.Extensions = mergeExtensions(existing.Extensions, annotated.Extensions)
-	if annotated.Content == nil || annotated.Content.Len() == 0 {
-		merged.Content = existing.Content
-		return &merged
-	}
-
-	content := orderedmap.New[string, *v3.MediaType]()
-	if existing.Content != nil {
-		for pair := existing.Content.First(); pair != nil; pair = pair.Next() {
-			content.Set(pair.Key(), pair.Value())
-		}
-	}
-	for pair := annotated.Content.First(); pair != nil; pair = pair.Next() {
-		mediaType := pair.Value()
-		if existingMediaType, ok := content.Get(pair.Key()); ok {
-			mediaType = mergeMediaType(existingMediaType, mediaType)
-		}
-		content.Set(pair.Key(), mediaType)
-	}
-	merged.Content = content
-	return &merged
-}
-
-// mergeMediaType fills fields the annotation didn't set from the generated
-// media type.
-func mergeMediaType(existing, annotated *v3.MediaType) *v3.MediaType {
-	if annotated == nil {
-		return existing
-	}
-	if existing == nil {
-		return annotated
-	}
-
-	merged := *existing
-	if annotated.Schema != nil {
-		merged.Schema = annotated.Schema
-	}
-	if annotated.ItemSchema != nil {
-		merged.ItemSchema = annotated.ItemSchema
-	}
-	if annotated.Example != nil {
-		merged.Example = annotated.Example
-	}
-	if annotated.Examples != nil {
-		merged.Examples = annotated.Examples
-	}
-	if annotated.Encoding != nil {
-		merged.Encoding = annotated.Encoding
-	}
-	if annotated.ItemEncoding != nil {
-		merged.ItemEncoding = annotated.ItemEncoding
-	}
-	merged.Extensions = mergeExtensions(existing.Extensions, annotated.Extensions)
-	return &merged
-}
-
-// mergeExtensions combines extension maps, letting the annotation override
-// generated keys.
-func mergeExtensions(existing, override *orderedmap.Map[string, *yaml.Node]) *orderedmap.Map[string, *yaml.Node] {
-	if override == nil {
-		return existing
-	}
-	merged := orderedmap.New[string, *yaml.Node]()
-	if existing != nil {
-		for pair := existing.First(); pair != nil; pair = pair.Next() {
-			merged.Set(pair.Key(), pair.Value())
-		}
-	}
-	for pair := override.First(); pair != nil; pair = pair.Next() {
-		merged.Set(pair.Key(), pair.Value())
-	}
-	return merged
 }
 
 // trueOrNil maps a proto3 bool, which can't distinguish false from unset, to
@@ -679,7 +595,7 @@ func toOperation(opts options.Options, op *goa3.Operation) *v3.Operation {
 		Responses:    toResponses(opts, op.GetResponses()),
 		Callbacks:    toCallbacks(opts, op.Callbacks),
 		Deprecated:   &op.Deprecated,
-		Security:     toSecurityRequirements(op.Security),
+		Security:     toSecurityRequirements(opts, op.Security),
 		Servers:      toServers(op.Servers),
 		Extensions:   toExtensions(op.SpecificationExtension),
 	}
