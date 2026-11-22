@@ -3,7 +3,7 @@
   "private": true,
   "description": "Demo harness that runs generated OpenAPI / JSON Schema specs through downstream tooling",
   "devDependencies": {
-    "@redocly/cli": "^2.77.0",
+    "@redocly/cli": "^2.81.0",
     "json-schema-to-typescript": "^16.0.0",
     "mint": "^4.3.19",
     "openapi-typescript": "^7.13.0",
