@@ -12,8 +12,8 @@ require (
 	github.com/gobwas/glob v1.1.0
 	github.com/google/gnostic v0.7.1
 	github.com/lmittmann/tint v1.2.1
-	github.com/pb33f/go-yaml v0.1.1
-	github.com/pb33f/libopenapi v0.42.5
+	github.com/pb33f/go-yaml v0.2.0
+	github.com/pb33f/libopenapi v0.43.2
 	github.com/pb33f/libopenapi-validator v0.16.3
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/stretchr/testify v1.12.1
