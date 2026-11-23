@@ -4,8 +4,8 @@ buf.build/gen/go/connectrpc/eliza/connectrpc/go/v2 v2.0.2-20230913231627-233fca7
 buf.build/gen/go/connectrpc/eliza/connectrpc/go/v2 v2.0.2-20230913231627-233fca715f49.1/go.mod h1:O0VUr8lkwzIRTTri//1V2jzn5bg0XhbrwcdgIxzFyHs=
 buf.build/gen/go/connectrpc/eliza/protocolbuffers/go v1.36.12-20230913231627-233fca715f49.2 h1:sfYzB+DvOUMwFuLAso7WCWDOOY7CajsLCgm5QV4Uerw=
 buf.build/gen/go/connectrpc/eliza/protocolbuffers/go v1.36.12-20230913231627-233fca715f49.2/go.mod h1:Q3bb88X5AB67NBfOK/BfNEaOUssVwuzKdcnU9FhreZE=
-buf.build/go/protovalidate v1.4.0 h1:UjLrYbt5VX7+TMOs2+pG5FhZhIG1mSfK4EIopbb4LcM=
-buf.build/go/protovalidate v1.4.0/go.mod h1:8vJfzNT6NIG2qm3uFsJDXMlRmG+bQJzbcIn1Aa0vPGs=
+buf.build/go/protovalidate v1.4.1 h1:G/AHf1EKrY9E0gXXxkPavEppwZe/7oAVq4rBbSWu0hQ=
+buf.build/go/protovalidate v1.4.1/go.mod h1:rwfPjgeCqK+DsDsBtLUNT1l5uoXl/0KFA632z3wlyCQ=
 cel.dev/cel-go v0.33.4 h1:9hd5BRPQZwj81qOddEXh0WhE1N3shkG3ad89pSqk+iU=
 cel.dev/cel-go v0.33.4/go.mod h1:DnVip7tpJSsgZymwfT+m1tnEVy3ivAjSMXPx12YrMkU=
 cel.dev/expr v0.25.3 h1:A2jO8jwOugrrovveCWfj0KEZOfqiLgAcwjpHPhzIGw0=
