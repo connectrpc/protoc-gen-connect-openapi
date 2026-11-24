@@ -17,6 +17,7 @@ syntax = "proto3";
 package googleapi_nested_body;
 
 import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
 
 // Tests that nested path params properly exclude the top-level field from the request body.
 service NestedBodyService {
@@ -34,7 +35,7 @@ message ParentRef {
 }
 
 message UpdateResourceRequest {
-  ParentRef parent_ref = 1;
+  ParentRef parent_ref = 1 [(google.api.field_behavior) = REQUIRED];
   string display_name = 2;
   string description = 3;
 }

@@ -1,0 +1,16 @@
+cases:
+  - name: "nested-param-parent-omitted-from-body"
+    method: PUT
+    path: "/v1/resources/r1"
+    body: '{"displayName": "Resource"}'
+    headers:
+      Content-Type: application/json
+
+  - name: "nested-param-parent-rejected-in-body"
+    method: PUT
+    path: "/v1/resources/r1"
+    body: '{"parentRef": {}, "displayName": "Resource"}'
+    headers:
+      Content-Type: application/json
+    errors:
+      - "parentRef"

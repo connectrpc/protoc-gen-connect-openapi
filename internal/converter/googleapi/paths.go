@@ -569,7 +569,8 @@ func partsToOpenAPIPath(tokens []Token, resMap map[string]string, renames map[st
 
 // removeNestedPathFields removes the leaves of nested path params from a body
 // schema. Each parent along the path is replaced with an inline copy of its
-// message schema, since the component schema is shared with other uses.
+// message schema, since the component schema is shared with other uses. A
+// parent left without fields is removed, as nothing of it is sent in the body.
 func removeNestedPathFields(opts options.Options, md protoreflect.MessageDescriptor, s *base.Schema, paths [][]string) {
 	byParent := map[string][][]string{}
 	var parents []string
@@ -608,6 +609,14 @@ func removeNestedPathFields(opts options.Options, md protoreflect.MessageDescrip
 			}
 		}
 		removeNestedPathFields(opts, field.Message(), inline, deeper)
+		if inline.Properties == nil || inline.Properties.Len() == 0 {
+			s.Properties.Delete(name)
+			s.Required = slices.DeleteFunc(s.Required, func(required string) bool { return required == name })
+			if len(s.Required) == 0 {
+				s.Required = nil
+			}
+			continue
+		}
 		s.Properties.Set(name, base.CreateSchemaProxy(inline))
 	}
 }
