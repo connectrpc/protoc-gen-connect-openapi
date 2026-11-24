@@ -9,7 +9,9 @@ paths:
       tags:
         - body_field_with_query_params.BookService
       summary: CreateAuthor
-      description: "Test case for the coveredFields bug - nested message fields \n should not appear as query parameters when the parent message is in body"
+      description: |-
+        Test case for the coveredFields bug - nested message fields 
+         should not appear as query parameters when the parent message is in body
       operationId: body_field_with_query_params.BookService.CreateAuthor
       parameters:
         - name: authorId
