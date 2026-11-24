@@ -27,10 +27,6 @@ paths:
             schema:
               type: object
               properties:
-                parentRef:
-                  type: object
-                  title: ParentRef
-                  additionalProperties: false
                 displayName:
                   type: string
                   title: display_name
@@ -100,6 +96,8 @@ components:
           type: string
           title: description
       title: UpdateResourceRequest
+      required:
+        - parentRef
       additionalProperties: false
     googleapi_nested_body.UpdateResourceResponse:
       type: object
