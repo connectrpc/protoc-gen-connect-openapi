@@ -367,6 +367,7 @@
         "properties": {
           "mode": {
             "description": "The mode for the Pipe. Not applicable for abstract sockets.",
+            "minimum": 0,
             "title": "mode",
             "type": "integer"
           },
@@ -410,6 +411,7 @@
             "type": "string"
           },
           "portValue": {
+            "minimum": 0,
             "title": "port_value",
             "type": "integer"
           },
@@ -904,14 +906,17 @@
         "description": "Envoy uses SemVer (https://semver.org/). Major/minor versions indicate\n expected behaviors and APIs, the patch version field is used only\n for security fixes and can be generally ignored.",
         "properties": {
           "majorNumber": {
+            "minimum": 0,
             "title": "major_number",
             "type": "integer"
           },
           "minorNumber": {
+            "minimum": 0,
             "title": "minor_number",
             "type": "integer"
           },
           "patch": {
+            "minimum": 0,
             "title": "patch",
             "type": "integer"
           }

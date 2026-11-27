@@ -399,6 +399,7 @@
           "uint32Value": {
             "type": "integer",
             "title": "uint32_value",
+            "minimum": 0,
             "description": "(proto uint32)"
           },
           "uint64Value": {
@@ -422,6 +423,7 @@
           "fixed32Value": {
             "type": "integer",
             "title": "fixed32_value",
+            "minimum": 0,
             "description": "(proto fixed32)"
           },
           "fixed64Value": {
@@ -521,7 +523,8 @@
           "uint32List": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "minimum": 0
             },
             "title": "uint32_list",
             "description": "(proto uint32)"
@@ -556,7 +559,8 @@
           "fixed32List": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "minimum": 0
             },
             "title": "fixed32_list",
             "description": "(proto fixed32)"
@@ -807,6 +811,7 @@
             "additionalProperties": {
               "type": "integer",
               "title": "value",
+              "minimum": 0,
               "description": "(proto uint32)"
             },
             "description": "(proto with_proto_annotations.test.v1.AllTypes.Uint32MapEntry)"
@@ -850,6 +855,7 @@
             "additionalProperties": {
               "type": "integer",
               "title": "value",
+              "minimum": 0,
               "description": "(proto fixed32)"
             },
             "description": "(proto with_proto_annotations.test.v1.AllTypes.Fixed32MapEntry)"
@@ -984,6 +990,7 @@
               "null"
             ],
             "title": "opt_uint32_value",
+            "minimum": 0,
             "description": "(proto uint32)"
           },
           "optUint64Value": {
@@ -1019,6 +1026,7 @@
               "null"
             ],
             "title": "opt_fixed32_value",
+            "minimum": 0,
             "description": "(proto fixed32)"
           },
           "optFixed64Value": {
@@ -1194,6 +1202,7 @@
           "uint32Option": {
             "type": "integer",
             "title": "uint32_option",
+            "minimum": 0,
             "description": "(proto uint32)"
           },
           "uint64Option": {
@@ -1217,6 +1226,7 @@
           "fixed32Option": {
             "type": "integer",
             "title": "fixed32_option",
+            "minimum": 0,
             "description": "(proto fixed32)"
           },
           "fixed64Option": {
@@ -1354,6 +1364,7 @@
           "uint32Value": {
             "type": "integer",
             "title": "uint32_value",
+            "minimum": 0,
             "description": "(proto uint32)"
           },
           "uint64Value": {
@@ -1377,6 +1388,7 @@
           "fixed32Value": {
             "type": "integer",
             "title": "fixed32_value",
+            "minimum": 0,
             "description": "(proto fixed32)"
           },
           "fixed64Value": {

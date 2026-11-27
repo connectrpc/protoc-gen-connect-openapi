@@ -205,6 +205,7 @@ components:
         uint32Value:
           type: integer
           title: uint32_value
+          minimum: 0
           description: (proto uint32)
         uint64Value:
           type: string
@@ -224,6 +225,7 @@ components:
         fixed32Value:
           type: integer
           title: fixed32_value
+          minimum: 0
           description: (proto fixed32)
         fixed64Value:
           type: string
@@ -297,6 +299,7 @@ components:
           type: array
           items:
             type: integer
+            minimum: 0
           title: uint32_list
           description: (proto uint32)
         uint64List:
@@ -324,6 +327,7 @@ components:
           type: array
           items:
             type: integer
+            minimum: 0
           title: fixed32_list
           description: (proto fixed32)
         fixed64List:
@@ -516,6 +520,7 @@ components:
           additionalProperties:
             type: integer
             title: value
+            minimum: 0
             description: (proto uint32)
           description: (proto with_proto_annotations.test.v1.AllTypes.Uint32MapEntry)
         uint64Map:
@@ -551,6 +556,7 @@ components:
           additionalProperties:
             type: integer
             title: value
+            minimum: 0
             description: (proto fixed32)
           description: (proto with_proto_annotations.test.v1.AllTypes.Fixed32MapEntry)
         fixed64Map:
@@ -648,6 +654,7 @@ components:
             - integer
             - "null"
           title: opt_uint32_value
+          minimum: 0
           description: (proto uint32)
         optUint64Value:
           type:
@@ -675,6 +682,7 @@ components:
             - integer
             - "null"
           title: opt_fixed32_value
+          minimum: 0
           description: (proto fixed32)
         optFixed64Value:
           type:
@@ -799,6 +807,7 @@ components:
         uint32Option:
           type: integer
           title: uint32_option
+          minimum: 0
           description: (proto uint32)
         uint64Option:
           type: string
@@ -818,6 +827,7 @@ components:
         fixed32Option:
           type: integer
           title: fixed32_option
+          minimum: 0
           description: (proto fixed32)
         fixed64Option:
           type: string
@@ -915,6 +925,7 @@ components:
         uint32Value:
           type: integer
           title: uint32_value
+          minimum: 0
           description: (proto uint32)
         uint64Value:
           type: string
@@ -934,6 +945,7 @@ components:
         fixed32Value:
           type: integer
           title: fixed32_value
+          minimum: 0
           description: (proto fixed32)
         fixed64Value:
           type: string

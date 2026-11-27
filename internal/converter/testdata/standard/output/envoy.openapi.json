@@ -762,6 +762,7 @@
           "mode": {
             "type": "integer",
             "title": "mode",
+            "minimum": 0,
             "description": "The mode for the Pipe. Not applicable for abstract sockets."
           }
         },
@@ -788,7 +789,8 @@
           },
           "portValue": {
             "type": "integer",
-            "title": "port_value"
+            "title": "port_value",
+            "minimum": 0
           },
           "namedPort": {
             "type": "string",
@@ -1293,15 +1295,18 @@
         "properties": {
           "majorNumber": {
             "type": "integer",
-            "title": "major_number"
+            "title": "major_number",
+            "minimum": 0
           },
           "minorNumber": {
             "type": "integer",
-            "title": "minor_number"
+            "title": "minor_number",
+            "minimum": 0
           },
           "patch": {
             "type": "integer",
-            "title": "patch"
+            "title": "patch",
+            "minimum": 0
           }
         },
         "title": "SemanticVersion",

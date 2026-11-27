@@ -2126,7 +2126,8 @@
             "title": "resource_arg_unique_id",
             "additionalProperties": {
               "type": "integer",
-              "title": "value"
+              "title": "value",
+              "minimum": 0
             },
             "description": "Unique IDs for each resource argument, used to track aliasing resources. If\n Argument A and Argument B alias each other, then\n resource_arg_unique_ids[A.index] == resource_arg_unique_ids[B.index].\n\n If this field is empty, none of the arguments could alias; otherwise, every\n resource argument should have an entry in this field.\n\n When instantiated, the unique IDs will be attached to the _Arg nodes'\n \"_resource_arg_unique_id\" attribute."
           },
@@ -3020,7 +3021,8 @@
           },
           "threadId": {
             "type": "integer",
-            "title": "thread_id"
+            "title": "thread_id",
+            "minimum": 0
           },
           "referencedTensor": {
             "type": "array",
@@ -4381,7 +4383,8 @@
           "uint32Val": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "minimum": 0
             },
             "title": "uint32_val",
             "description": "DT_UINT32"

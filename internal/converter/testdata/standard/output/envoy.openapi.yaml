@@ -651,6 +651,7 @@ components:
         mode:
           type: integer
           title: mode
+          minimum: 0
           description: The mode for the Pipe. Not applicable for abstract sockets.
       title: Pipe
       additionalProperties: false
@@ -682,6 +683,7 @@ components:
         portValue:
           type: integer
           title: port_value
+          minimum: 0
         namedPort:
           type: string
           title: named_port
@@ -1330,12 +1332,15 @@ components:
         majorNumber:
           type: integer
           title: major_number
+          minimum: 0
         minorNumber:
           type: integer
           title: minor_number
+          minimum: 0
         patch:
           type: integer
           title: patch
+          minimum: 0
       title: SemanticVersion
       additionalProperties: false
       description: |-

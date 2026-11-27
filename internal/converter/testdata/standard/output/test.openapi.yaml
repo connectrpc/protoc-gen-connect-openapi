@@ -202,6 +202,7 @@ components:
         uint32Value:
           type: integer
           title: uint32_value
+          minimum: 0
         uint64Value:
           type: string
           title: uint64_value
@@ -217,6 +218,7 @@ components:
         fixed32Value:
           type: integer
           title: fixed32_value
+          minimum: 0
         fixed64Value:
           type: string
           title: fixed64_value
@@ -280,6 +282,7 @@ components:
           type: array
           items:
             type: integer
+            minimum: 0
           title: uint32_list
         uint64List:
           type: array
@@ -303,6 +306,7 @@ components:
           type: array
           items:
             type: integer
+            minimum: 0
           title: fixed32_list
         fixed64List:
           type: array
@@ -459,6 +463,7 @@ components:
           additionalProperties:
             type: integer
             title: value
+            minimum: 0
         uint64Map:
           type: object
           title: uint64_map
@@ -486,6 +491,7 @@ components:
           additionalProperties:
             type: integer
             title: value
+            minimum: 0
         fixed64Map:
           type: object
           title: fixed64_map
@@ -567,6 +573,7 @@ components:
             - integer
             - "null"
           title: opt_uint32_value
+          minimum: 0
         optUint64Value:
           type:
             - string
@@ -590,6 +597,7 @@ components:
             - integer
             - "null"
           title: opt_fixed32_value
+          minimum: 0
         optFixed64Value:
           type:
             - string
@@ -695,6 +703,7 @@ components:
         uint32Option:
           type: integer
           title: uint32_option
+          minimum: 0
         uint64Option:
           type: string
           title: uint64_option
@@ -710,6 +719,7 @@ components:
         fixed32Option:
           type: integer
           title: fixed32_option
+          minimum: 0
         fixed64Option:
           type: string
           title: fixed64_option
@@ -795,6 +805,7 @@ components:
         uint32Value:
           type: integer
           title: uint32_value
+          minimum: 0
         uint64Value:
           type: string
           title: uint64_value
@@ -810,6 +821,7 @@ components:
         fixed32Value:
           type: integer
           title: fixed32_value
+          minimum: 0
         fixed64Value:
           type: string
           title: fixed64_value

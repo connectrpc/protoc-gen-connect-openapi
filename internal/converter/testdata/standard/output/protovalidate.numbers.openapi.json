@@ -292,6 +292,7 @@
           "val": {
             "type": "integer",
             "title": "val",
+            "minimum": 0,
             "const": 1
           }
         },
@@ -332,7 +333,8 @@
             "examples": [
               0
             ],
-            "title": "val"
+            "title": "val",
+            "minimum": 0
           }
         },
         "title": "Fixed32Example",
@@ -402,7 +404,8 @@
                 "const": 0
               }
             ],
-            "title": "val"
+            "title": "val",
+            "minimum": 0
           }
         },
         "title": "Fixed32Ignore",
@@ -414,6 +417,7 @@
           "val": {
             "type": "integer",
             "title": "val",
+            "minimum": 0,
             "enum": [
               2,
               3
@@ -441,7 +445,8 @@
           "val": {
             "exclusiveMaximum": 5,
             "type": "integer",
-            "title": "val"
+            "title": "val",
+            "minimum": 0
           }
         },
         "title": "Fixed32LT",
@@ -453,7 +458,8 @@
           "val": {
             "type": "integer",
             "title": "val",
-            "maximum": 64
+            "maximum": 64,
+            "minimum": 0
           }
         },
         "title": "Fixed32LTE",
@@ -464,7 +470,8 @@
         "properties": {
           "val": {
             "type": "integer",
-            "title": "val"
+            "title": "val",
+            "minimum": 0
           }
         },
         "title": "Fixed32None",
@@ -481,7 +488,8 @@
                 0
               ]
             },
-            "title": "val"
+            "title": "val",
+            "minimum": 0
           }
         },
         "title": "Fixed32NotIn",
@@ -2339,6 +2347,7 @@
           "val": {
             "type": "integer",
             "title": "val",
+            "minimum": 0,
             "const": 1
           }
         },
@@ -2379,7 +2388,8 @@
             "examples": [
               0
             ],
-            "title": "val"
+            "title": "val",
+            "minimum": 0
           }
         },
         "title": "UInt32Example",
@@ -2449,7 +2459,8 @@
                 "const": 0
               }
             ],
-            "title": "val"
+            "title": "val",
+            "minimum": 0
           }
         },
         "title": "UInt32Ignore",
@@ -2461,6 +2472,7 @@
           "val": {
             "type": "integer",
             "title": "val",
+            "minimum": 0,
             "enum": [
               2,
               3
@@ -2488,7 +2500,8 @@
           "val": {
             "exclusiveMaximum": 5,
             "type": "integer",
-            "title": "val"
+            "title": "val",
+            "minimum": 0
           }
         },
         "title": "UInt32LT",
@@ -2500,7 +2513,8 @@
           "val": {
             "type": "integer",
             "title": "val",
-            "maximum": 64
+            "maximum": 64,
+            "minimum": 0
           }
         },
         "title": "UInt32LTE",
@@ -2511,7 +2525,8 @@
         "properties": {
           "val": {
             "type": "integer",
-            "title": "val"
+            "title": "val",
+            "minimum": 0
           }
         },
         "title": "UInt32None",
@@ -2528,7 +2543,8 @@
                 0
               ]
             },
-            "title": "val"
+            "title": "val",
+            "minimum": 0
           }
         },
         "title": "UInt32NotIn",

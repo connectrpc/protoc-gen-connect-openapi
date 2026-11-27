@@ -181,6 +181,7 @@
             "title": "doubleField"
           },
           "fixed32Field": {
+            "minimum": 0,
             "title": "fixed32Field",
             "type": "integer"
           },
@@ -263,6 +264,7 @@
             "type": "string"
           },
           "uint32Field": {
+            "minimum": 0,
             "title": "uint32Field",
             "type": "integer"
           },
