@@ -38,4 +38,10 @@ service Foo {
 			tags: ["Endpoint 2"]
 		};
 	}
+	// No google.api.http annotation, no tags.
+	rpc Plain(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+	// No google.api.http annotation, annotated tag.
+	rpc Tagged(google.protobuf.Empty) returns (google.protobuf.Empty) {
+		option (gnostic.openapi.v3.operation) = {tags: ["Domain"]};
+	}
 }
