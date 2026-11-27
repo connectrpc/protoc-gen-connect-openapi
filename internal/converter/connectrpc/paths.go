@@ -58,12 +58,7 @@ func methodHasGet(opts options.Options, method protoreflect.MethodDescriptor) bo
 
 func MethodToOperation(opts options.Options, method protoreflect.MethodDescriptor, returnGet bool) *v3.Operation {
 	fd := method.ParentFile()
-	service := method.Parent().(protoreflect.ServiceDescriptor)
 	loc := fd.SourceLocations().ByDescriptor(method)
-	tagName := string(service.FullName())
-	if opts.ShortServiceTags {
-		tagName = string(service.Name())
-	}
 
 	operationId := util.DefaultOperationID(opts, method)
 
@@ -75,8 +70,15 @@ func MethodToOperation(opts options.Options, method protoreflect.MethodDescripto
 		Summary:     summary,
 		OperationId: operationId,
 		Deprecated:  util.IsMethodDeprecated(method),
-		Tags:        []string{tagName},
 		Description: description,
+	}
+	if !opts.WithoutDefaultTags {
+		service := method.Parent().(protoreflect.ServiceDescriptor)
+		tagName := string(service.FullName())
+		if opts.ShortServiceTags {
+			tagName = string(service.Name())
+		}
+		op.Tags = []string{tagName}
 	}
 
 	isStreaming := method.IsStreamingClient() || method.IsStreamingServer()
