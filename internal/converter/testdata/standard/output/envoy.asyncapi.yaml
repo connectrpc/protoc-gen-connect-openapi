@@ -390,6 +390,7 @@ components:
             properties:
                 mode:
                     description: The mode for the Pipe. Not applicable for abstract sockets.
+                    minimum: 0
                     title: mode
                     type: integer
                 path:
@@ -460,6 +461,7 @@ components:
                     title: network_namespace_filepath
                     type: string
                 portValue:
+                    minimum: 0
                     title: port_value
                     type: integer
                 protocol:
@@ -1080,12 +1082,15 @@ components:
                  for security fixes and can be generally ignored.
             properties:
                 majorNumber:
+                    minimum: 0
                     title: major_number
                     type: integer
                 minorNumber:
+                    minimum: 0
                     title: minor_number
                     type: integer
                 patch:
+                    minimum: 0
                     title: patch
                     type: integer
             title: SemanticVersion

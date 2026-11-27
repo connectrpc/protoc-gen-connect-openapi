@@ -121,6 +121,7 @@ components:
                           type: string
                     title: doubleField
                 fixed32Field:
+                    minimum: 0
                     title: fixed32Field
                     type: integer
                 fixed64Field:
@@ -178,6 +179,7 @@ components:
                     title: stringField
                     type: string
                 uint32Field:
+                    minimum: 0
                     title: uint32Field
                     type: integer
                 uint64Field:

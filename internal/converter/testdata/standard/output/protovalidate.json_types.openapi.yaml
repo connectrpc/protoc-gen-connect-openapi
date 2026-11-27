@@ -166,6 +166,7 @@ components:
             enum:
               - 3
           title: uint32_in
+          minimum: 0
           enum:
             - 1
             - 2
@@ -178,6 +179,7 @@ components:
             enum:
               - 3
           title: fixed32_in
+          minimum: 0
           enum:
             - 1
             - 2
@@ -280,6 +282,7 @@ components:
         uint32Const:
           type: integer
           title: uint32_const
+          minimum: 0
           const: 7
         int64Const:
           type: string

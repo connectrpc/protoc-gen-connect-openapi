@@ -766,7 +766,8 @@
           },
           "uint32Field": {
             "type": "integer",
-            "title": "uint32Field"
+            "title": "uint32Field",
+            "minimum": 0
           },
           "uint64Field": {
             "type": "string",
@@ -785,7 +786,8 @@
           },
           "fixed32Field": {
             "type": "integer",
-            "title": "fixed32Field"
+            "title": "fixed32Field",
+            "minimum": 0
           },
           "fixed64Field": {
             "type": "string",

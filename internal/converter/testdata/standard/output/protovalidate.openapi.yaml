@@ -506,12 +506,14 @@ components:
         uint32Const:
           type: integer
           title: uint32_const
+          minimum: 0
           description: uint32
           const: 42
         uint32In:
           type: array
           items:
             type: integer
+            minimum: 0
             enum:
               - 1
               - 2
@@ -527,15 +529,18 @@ components:
                 - 1
                 - 2
                 - 3
+            minimum: 0
           title: uint32_not_in
         uint32Lt:
           exclusiveMaximum: 42
           type: integer
           title: uint32_lt
+          minimum: 0
         uint32Lte:
           type: integer
           title: uint32_lte
           maximum: 420
+          minimum: 0
         uint32Gt:
           exclusiveMinimum: 6
           type: integer
@@ -724,12 +729,14 @@ components:
         fixed32Const:
           type: integer
           title: fixed32_const
+          minimum: 0
           description: fixed32
           const: 42
         fixed32In:
           type: array
           items:
             type: integer
+            minimum: 0
             enum:
               - 1
               - 2
@@ -745,15 +752,18 @@ components:
                 - 1
                 - 2
                 - 3
+            minimum: 0
           title: fixed32_not_in
         fixed32Lt:
           exclusiveMaximum: 42
           type: integer
           title: fixed32_lt
+          minimum: 0
         fixed32Lte:
           type: integer
           title: fixed32_lte
           maximum: 420
+          minimum: 0
         fixed32Gt:
           exclusiveMinimum: 6
           type: integer

@@ -1921,6 +1921,7 @@ components:
           additionalProperties:
             type: integer
             title: value
+            minimum: 0
           description: |-
             Unique IDs for each resource argument, used to track aliasing resources. If
              Argument A and Argument B alias each other, then
@@ -2979,6 +2980,7 @@ components:
         threadId:
           type: integer
           title: thread_id
+          minimum: 0
         referencedTensor:
           type: array
           items:
@@ -4382,6 +4384,7 @@ components:
           type: array
           items:
             type: integer
+            minimum: 0
           title: uint32_val
           description: DT_UINT32
         uint64Val:

@@ -265,6 +265,14 @@ func ScalarFieldToSchema(opts options.Options, parent *base.SchemaProxy, tt prot
 	}
 	// Apply Updates from Options
 	s = opts.FieldAnnotator.AnnotateField(opts, s, tt, inContainer)
+	// Unsigned 32-bit fields are non-negative; bound them unless a rule already did.
+	switch tt.Kind() {
+	case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
+		if s.Minimum == nil && s.ExclusiveMinimum == nil {
+			zero := 0.0
+			s.Minimum = &zero
+		}
+	}
 	return s
 }
 

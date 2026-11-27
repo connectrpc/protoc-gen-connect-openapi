@@ -214,6 +214,7 @@ components:
         val:
           type: integer
           title: val
+          minimum: 0
           const: 1
       title: Fixed32Const
       additionalProperties: false
@@ -245,6 +246,7 @@ components:
           examples:
             - 0
           title: val
+          minimum: 0
       title: Fixed32Example
       additionalProperties: false
     buf.validate.conformance.cases.Fixed32GT:
@@ -295,6 +297,7 @@ components:
               minimum: 128
             - const: 0
           title: val
+          minimum: 0
       title: Fixed32Ignore
       additionalProperties: false
     buf.validate.conformance.cases.Fixed32In:
@@ -303,6 +306,7 @@ components:
         val:
           type: integer
           title: val
+          minimum: 0
           enum:
             - 2
             - 3
@@ -324,6 +328,7 @@ components:
           exclusiveMaximum: 5
           type: integer
           title: val
+          minimum: 0
       title: Fixed32LT
       additionalProperties: false
     buf.validate.conformance.cases.Fixed32LTE:
@@ -333,6 +338,7 @@ components:
           type: integer
           title: val
           maximum: 64
+          minimum: 0
       title: Fixed32LTE
       additionalProperties: false
     buf.validate.conformance.cases.Fixed32None:
@@ -341,6 +347,7 @@ components:
         val:
           type: integer
           title: val
+          minimum: 0
       title: Fixed32None
       additionalProperties: false
     buf.validate.conformance.cases.Fixed32NotIn:
@@ -353,6 +360,7 @@ components:
             enum:
               - 0
           title: val
+          minimum: 0
       title: Fixed32NotIn
       additionalProperties: false
     buf.validate.conformance.cases.Fixed64Const:
@@ -1818,6 +1826,7 @@ components:
         val:
           type: integer
           title: val
+          minimum: 0
           const: 1
       title: UInt32Const
       additionalProperties: false
@@ -1849,6 +1858,7 @@ components:
           examples:
             - 0
           title: val
+          minimum: 0
       title: UInt32Example
       additionalProperties: false
     buf.validate.conformance.cases.UInt32GT:
@@ -1899,6 +1909,7 @@ components:
               minimum: 128
             - const: 0
           title: val
+          minimum: 0
       title: UInt32Ignore
       additionalProperties: false
     buf.validate.conformance.cases.UInt32In:
@@ -1907,6 +1918,7 @@ components:
         val:
           type: integer
           title: val
+          minimum: 0
           enum:
             - 2
             - 3
@@ -1928,6 +1940,7 @@ components:
           exclusiveMaximum: 5
           type: integer
           title: val
+          minimum: 0
       title: UInt32LT
       additionalProperties: false
     buf.validate.conformance.cases.UInt32LTE:
@@ -1937,6 +1950,7 @@ components:
           type: integer
           title: val
           maximum: 64
+          minimum: 0
       title: UInt32LTE
       additionalProperties: false
     buf.validate.conformance.cases.UInt32None:
@@ -1945,6 +1959,7 @@ components:
         val:
           type: integer
           title: val
+          minimum: 0
       title: UInt32None
       additionalProperties: false
     buf.validate.conformance.cases.UInt32NotIn:
@@ -1957,6 +1972,7 @@ components:
             enum:
               - 0
           title: val
+          minimum: 0
       title: UInt32NotIn
       additionalProperties: false
     buf.validate.conformance.cases.UInt64Const:

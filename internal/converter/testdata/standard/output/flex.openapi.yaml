@@ -493,6 +493,7 @@ components:
         uint32Field:
           type: integer
           title: uint32Field
+          minimum: 0
         uint64Field:
           type: string
           title: uint64Field
@@ -508,6 +509,7 @@ components:
         fixed32Field:
           type: integer
           title: fixed32Field
+          minimum: 0
         fixed64Field:
           type: string
           title: fixed64Field

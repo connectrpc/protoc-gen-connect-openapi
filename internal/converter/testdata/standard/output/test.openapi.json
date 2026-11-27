@@ -395,7 +395,8 @@
           },
           "uint32Value": {
             "type": "integer",
-            "title": "uint32_value"
+            "title": "uint32_value",
+            "minimum": 0
           },
           "uint64Value": {
             "type": "string",
@@ -414,7 +415,8 @@
           },
           "fixed32Value": {
             "type": "integer",
-            "title": "fixed32_value"
+            "title": "fixed32_value",
+            "minimum": 0
           },
           "fixed64Value": {
             "type": "string",
@@ -504,7 +506,8 @@
           "uint32List": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "minimum": 0
             },
             "title": "uint32_list"
           },
@@ -535,7 +538,8 @@
           "fixed32List": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "minimum": 0
             },
             "title": "fixed32_list"
           },
@@ -749,7 +753,8 @@
             "title": "uint32_map",
             "additionalProperties": {
               "type": "integer",
-              "title": "value"
+              "title": "value",
+              "minimum": 0
             }
           },
           "uint64Map": {
@@ -784,7 +789,8 @@
             "title": "fixed32_map",
             "additionalProperties": {
               "type": "integer",
-              "title": "value"
+              "title": "value",
+              "minimum": 0
             }
           },
           "fixed64Map": {
@@ -902,7 +908,8 @@
               "integer",
               "null"
             ],
-            "title": "opt_uint32_value"
+            "title": "opt_uint32_value",
+            "minimum": 0
           },
           "optUint64Value": {
             "type": [
@@ -933,7 +940,8 @@
               "integer",
               "null"
             ],
-            "title": "opt_fixed32_value"
+            "title": "opt_fixed32_value",
+            "minimum": 0
           },
           "optFixed64Value": {
             "type": [
@@ -1089,7 +1097,8 @@
           },
           "uint32Option": {
             "type": "integer",
-            "title": "uint32_option"
+            "title": "uint32_option",
+            "minimum": 0
           },
           "uint64Option": {
             "type": "string",
@@ -1108,7 +1117,8 @@
           },
           "fixed32Option": {
             "type": "integer",
-            "title": "fixed32_option"
+            "title": "fixed32_option",
+            "minimum": 0
           },
           "fixed64Option": {
             "type": "string",
@@ -1233,7 +1243,8 @@
           },
           "uint32Value": {
             "type": "integer",
-            "title": "uint32_value"
+            "title": "uint32_value",
+            "minimum": 0
           },
           "uint64Value": {
             "type": "string",
@@ -1252,7 +1263,8 @@
           },
           "fixed32Value": {
             "type": "integer",
-            "title": "fixed32_value"
+            "title": "fixed32_value",
+            "minimum": 0
           },
           "fixed64Value": {
             "type": "string",
